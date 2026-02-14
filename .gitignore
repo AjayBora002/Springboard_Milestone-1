@@ -8,5 +8,3 @@ data/
 
 # Ignore python cache
 __pycache__/
-
-state.db
