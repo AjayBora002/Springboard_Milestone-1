@@ -1,0 +1,10 @@
+# Ignore the API key (Security risk!)
+kaggle.json
+
+# Ignore data files (Too large for git)
+data/
+*.csv
+*.zip
+
+# Ignore python cache
+__pycache__/
