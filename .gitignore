@@ -1,10 +1,13 @@
-# Ignore the API key (Security risk!)
-kaggle.json
-
-# Ignore data files (Too large for git)
+# Ignore Data Files (Too large for GitHub)
 data/
 *.csv
 *.zip
 
-# Ignore python cache
+# Ignore Secrets (Security!)
+kaggle.json
+
+# Ignore Python System Files
 __pycache__/
+.ipynb_checkpoints/
+.venv/
+.env
