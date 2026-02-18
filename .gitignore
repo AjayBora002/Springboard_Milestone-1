@@ -1,0 +1,13 @@
+# Ignore Data Files (Too large for GitHub)
+data/
+*.csv
+*.zip
+
+# Ignore Secrets (Security!)
+kaggle.json
+
+# Ignore Python System Files
+__pycache__/
+.ipynb_checkpoints/
+.venv/
+.env
