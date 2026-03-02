@@ -1,10 +1,10 @@
-🌍 ClimateScope: Visualizing Global Weather Trends
+# 🌍 ClimateScope: Visualizing Global Weather Trends
 
-![Status](https://img.shields.io/badge/Status-Milestone%201%20Complete-success)
+![Status](https://img.shields.io/badge/Status-Milestone%202%20Complete-success)
 ![Python](https://img.shields.io/badge/Python-3.x-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-**ClimateScope** is a data analytics project designed to analyze and visually represent global weather patterns. [cite_start]By leveraging the Global Weather Repository dataset, this project aims to uncover seasonal trends, regional variations, and extreme weather events through interactive visualizations[cite: 3].
+**ClimateScope** is a data analytics project that analyzes and visually represents global weather patterns. By leveraging the Global Weather Repository dataset, this project uncovers seasonal trends, regional variations, and extreme weather events through statistical analysis and interactive visualizations.
 
 ---
 
@@ -13,63 +13,123 @@
 - [Tech Stack](#-tech-stack)
 - [Dataset](#-dataset)
 - [Project Structure](#-project-structure)
-- [Installation & Setup](#-installation--setup)
 - [Milestones](#-milestones)
+- [Installation & Setup](#-installation--setup)
 - [Reports](#-reports)
 
 ---
 
 ## 🎯 Objective
-[cite_start]The primary goal is to provide an accessible, data-driven platform that supports climate awareness[cite: 6].
-* [cite_start]**Analyze:** Daily-updated worldwide weather data[cite: 5].
-* [cite_start]**Visualize:** Comparisons of conditions across regions and continents[cite: 5].
-* [cite_start]**Identify:** Anomalies, heatwaves, and extreme precipitation events[cite: 5].
+
+- **Analyze:** Daily-updated worldwide weather data across 300,000+ global observations.
+- **Visualize:** Comparisons of temperature, precipitation, humidity, and wind across regions.
+- **Identify:** Anomalies, heatwaves, extreme precipitation events, and seasonal patterns.
 
 ---
 
 ## 🛠 Tech Stack
-* [cite_start]**Language:** Python 3.x [cite: 61]
-* [cite_start]**Data Handling:** Pandas, NumPy [cite: 63]
-* [cite_start]**Data Acquisition:** Kaggle API [cite: 64]
-* [cite_start]**Visualization:** Matplotlib, Seaborn (Milestone 1), Plotly (Planned) [cite: 66]
+
+| Category | Libraries |
+|---|---|
+| Language | Python 3.x |
+| Data Handling | Pandas, NumPy |
+| Visualization | Matplotlib, Seaborn, Plotly Express |
+| Notebook | Jupyter Notebook |
+| Data Acquisition | Kaggle API |
+| Dashboard (M3) | Plotly Dash / Streamlit *(planned)* |
 
 ---
 
 ## 📊 Dataset
-* [cite_start]**Source:** [Global Weather Repository (Kaggle)](https://www.kaggle.com/datasets/nelgiriyewithana/global-weather-repository) [cite: 11]
-* [cite_start]**Description:** Daily weather data including temperature (Celsius), wind speed, precipitation, humidity, and atmospheric pressure[cite: 14].
-* [cite_start]**Data Cleaning:** Duplicates removed, missing values handled, and daily data aggregated into monthly averages[cite: 20].
+
+- **Source:** [Global Weather Repository (Kaggle)](https://www.kaggle.com/datasets/nelgiriyewithana/global-weather-repository)
+- **Description:** Daily weather data including temperature (°C), wind speed (mph), precipitation (mm), humidity (%), UV index, and atmospheric pressure across thousands of global locations.
+- **Data Cleaning (Milestone 1):** Duplicates removed, missing values handled, columns standardized, and daily data aggregated into monthly summaries.
 
 ---
 
 ## 📂 Project Structure
+
 ```text
-ClimateScope/
+Climate_Scope/
 │
-├── data/                      # Data storage (ignored by git)
-│   ├── clean_weather_data.csv # Processed daily data
-│   └── monthly_weather_summary.csv # Aggregated monthly data
+├── data/                              # Data storage (excluded from git)
+│   ├── GlobalWeatherRepository.csv    # Raw dataset from Kaggle
+│   ├── cleaned_weather_data.csv       # Processed & cleaned dataset
+│   └── monthly_weather_summary.csv    # Aggregated monthly data
 │
-├── milestone1.ipynb           # Main analysis notebook with visualizations
-├── Milestone1_Report.md       # Summary of data quality and schema
-├── requirements.txt           # Python dependencies
-├── .gitignore                 # Security file (API keys, data)
-└── README.md                  # Project documentation
-⚙️ Installation & Setup
-1. Clone the Repository
-Bash
-git clone [https://github.com/AjayBora002/Springboard_Milestone1.git](https://github.com/AjayBora002/Springboard_Milestone1.git)
-cd Springboard_Milestone1
-2. Install Dependencies
-Bash
+├── notebooks/
+│   ├── milestone1.ipynb               # M1: Data ingestion, cleaning, EDA
+│   └── milestone2_executed.ipynb      # M2: Statistical analysis & visualizations
+│
+├── reports/
+│   ├── milestone2_report.md           # M2: Full analytical findings report
+│   └── dashboard_mockup.md            # M2: Dashboard wireframe & design spec
+│
+├── requirements.txt                   # Python dependencies with version pins
+├── .gitignore                         # Excludes data files and API keys
+└── README.md                          # Project documentation
+```
+
+---
+
+## 🏁 Milestones
+
+### ✅ Milestone 1 — Data Acquisition & Cleaning
+- Downloaded Global Weather Repository via Kaggle API
+- Cleaned 300,000+ records: removed duplicates, handled nulls, standardized column types
+- Generated `cleaned_weather_data.csv` and `monthly_weather_summary.csv`
+- **Notebook:** [`notebooks/milestone1.ipynb`](notebooks/milestone1.ipynb)
+
+### ✅ Milestone 2 — Core Analysis & Visualization Design
+- **Statistical Analysis:** Descriptive stats, correlation matrix, skewness/IQR, seasonal trends
+- **Extreme Weather Events:** Identified top-1% heat, precipitation, and wind events (Z-score & percentile methods)
+- **Regional Comparisons:** Top 10 hottest/coldest countries, most humid and highest-precipitation regions
+- **Visualization Selection:** Choropleth maps, Line charts, Scatterplots, Heatmaps, Box plots, Histograms
+- **Dashboard Design:** Full wireframe with 4-page interactive layout ([`reports/dashboard_mockup.md`](reports/dashboard_mockup.md))
+- **Notebook:** [`notebooks/milestone2_executed.ipynb`](notebooks/milestone2_executed.ipynb)
+- **Report:** [`reports/milestone2_report.md`](reports/milestone2_report.md)
+
+### 🔜 Milestone 3 — Interactive Dashboard (Upcoming)
+- Build interactive dashboard using Plotly Dash or Streamlit
+- Embed choropleth maps, filtered time-series views, and extreme event alert thresholds
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/AjayBora002/Springboard_Milestine1.git
+cd Springboard_Milestine1
+```
+
+### 2. Install Dependencies
+```bash
 pip install -r requirements.txt
-3. Configure Kaggle API
-Place your kaggle.json file in the root directory.
+```
 
-Note: This file is ignored by Git for security.
+### 3. Configure Kaggle API
+Place your `kaggle.json` file in the root directory.
+> ⚠️ This file is listed in `.gitignore` and will **not** be committed to Git.
 
-4. Run the Analysis
-Open the Jupyter Notebook to download data and generate the clean datasets:
+### 4. Run the Analysis
 
-Bash
-jupyter notebook milestone1.ipynb
+**Milestone 1 — Data Cleaning:**
+```bash
+jupyter notebook notebooks/milestone1.ipynb
+```
+
+**Milestone 2 — Statistical Analysis & Visualizations:**
+```bash
+jupyter notebook notebooks/milestone2_executed.ipynb
+```
+
+---
+
+## 📄 Reports
+
+| Report | Description |
+|---|---|
+| [`reports/milestone2_report.md`](reports/milestone2_report.md) | Full Milestone 2 analytical findings — statistics, extreme events, regional comparisons, visualization rationale |
+| [`reports/dashboard_mockup.md`](reports/dashboard_mockup.md) | Dashboard wireframe & interaction design for Milestone 3 |
