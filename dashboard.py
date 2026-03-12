@@ -106,7 +106,8 @@ if page == "> Overview":
         'temperature_celsius': 'mean',
         'humidity': 'mean',
         'wind_mph': 'mean',
-        'precip_mm': 'mean'
+        'precip_mm': 'mean',
+        'iso_alpha': 'first'
     }).reset_index()
     
     # Dynamic color scale based on metric
@@ -119,8 +120,8 @@ if page == "> Overview":
 
     fig_map = px.choropleth(
         country_agg, 
-        locations="country", 
-        locationmode="country names",
+        locations="iso_alpha", 
+        locationmode="ISO-3",
         color=map_metric, 
         hover_name="country",
         hover_data={"temperature_celsius": ':.1f', "humidity": ':.1f', "wind_mph": ':.1f', "precip_mm": ':.2f'},
