@@ -89,20 +89,6 @@ if page == "> Overview":
     
     st.markdown("---")
     
-    # Professional Feature: Data Expanders and Download
-    with st.expander("📊 View Filtered Dataset & Statistics"):
-        st.dataframe(filtered_df.head(100), use_container_width=True)
-        st.markdown("**Descriptive Statistics:**")
-        st.dataframe(filtered_df[['temperature_celsius', 'humidity', 'wind_mph', 'precip_mm']].describe(), use_container_width=True)
-        
-        csv_data = filtered_df.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="⬇️ Download Filtered Data as CSV",
-            data=csv_data,
-            file_name='filtered_climate_data.csv',
-            mime='text/csv',
-        )
-    
     st.markdown("---")
     st.subheader("💡 Key Insights")
     st.info("Temperature is the most spatially variable metric, driven primarily by latitude and climate zone. Global trends strongly follow seasonal variations, especially visible in the northern hemisphere.")
