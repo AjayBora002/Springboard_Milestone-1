@@ -10,6 +10,12 @@ st.set_page_config(page_title="Climate Scope", page_icon="🌍", layout="wide")
 st.markdown("""
 <style>
 /* Clean dark theme aesthetics */
+div[data-testid="metric-container"] {
+    background-color: #1E293B;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -97,6 +103,13 @@ if page == "> Overview":
             mime='text/csv',
         )
     
+    st.markdown("---")
+    st.subheader("💡 Key Insights")
+    st.info("Temperature is the most spatially variable metric, driven primarily by latitude and climate zone. Global trends strongly follow seasonal variations, especially visible in the northern hemisphere.")
+    
+
+
+    
     # Choropleth Map: Average Temperature by Country
     st.subheader("Map: Global Average Temperature")
     country_agg = filtered_df.groupby('country').agg({
@@ -120,6 +133,9 @@ if page == "> Overview":
 elif page == "> Temperature":
     st.title("Temperature & Seasonal Trends")
     
+
+
+
     # Line Chart: Avg Temp by Month
     st.subheader("Average Temperature by Month")
     temp_trend = filtered_df.groupby(['month', 'country'])['temperature_celsius'].mean().reset_index()
@@ -156,6 +172,10 @@ elif page == "> Temperature":
         )
         st.plotly_chart(fig_corr, use_container_width=True)
 
+    st.markdown("---")
+    st.subheader("💡 Key Insights")
+    st.info("UV Index and Temperature move together globally, both peaking in summer months. Humidity shows a moderate negative correlation with temperature indicating hotter regions tend to be drier.")
+
 elif page == "> Time Series Analysis":
     st.title("Time Series & Rolling Averages")
     
@@ -189,6 +209,10 @@ elif page == "> Time Series Analysis":
     )
     fig_metric.update_layout(hovermode="x unified")
     st.plotly_chart(fig_metric, use_container_width=True)
+
+    st.markdown("---")
+    st.subheader("💡 Key Insights")
+    st.info("Strong seasonal cycles are visible in mid-latitude countries, while near-equatorial zones show less monthly temperature variation.")
 
 elif page == "> Extreme Events":
     st.title("Extreme Weather Events")
@@ -261,6 +285,10 @@ elif page == "> Extreme Events":
         st.warning(f"Found {len(anomalies)} anomalies for {anomaly_metric}!")
         st.dataframe(anomalies[['country', 'location_name', 'date', anomaly_metric, 'z_score']].sort_values(by='z_score', key=abs, ascending=False).head(15), use_container_width=True)
 
+    st.markdown("---")
+    st.subheader("💡 Key Insights")
+    st.info("Extreme weather events (heat, rain, wind) are geographically clustered, not random. Precipitation is highly irregular and skewed — rare but extreme events dominate totals in monsoon regions.")
+
 elif page == "> Regional Comparison":
     st.title("Regional Comparison")
     
@@ -310,4 +338,8 @@ elif page == "> Regional Comparison":
                 hover_data=["location_name"], opacity=0.7
             )
             st.plotly_chart(fig_scatter, use_container_width=True)
+
+    st.markdown("---")
+    st.subheader("💡 Key Insights")
+    st.info("Regional comparisons highlight distinct climate groupings: equatorial countries dominate top temperatures while coastal/island nations lead in humidity and precipitation.")
 
