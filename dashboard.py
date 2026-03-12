@@ -96,22 +96,36 @@ if page == "> Overview":
 
 
     
-    # Choropleth Map: Average Temperature by Country
-    st.subheader("Map: Global Average Temperature")
+    # Interactive Choropleth Map
+    st.subheader("Interactive Global Map")
+    map_metric = st.selectbox("Select Metric to Visualize on Map:", 
+                              ["temperature_celsius", "humidity", "wind_mph", "precip_mm"], 
+                              format_func=lambda x: x.replace('_', ' ').title().replace('Celsius', '(°C)').replace('Mph', '(mph)').replace('Mm', '(mm)'))
+    
     country_agg = filtered_df.groupby('country').agg({
         'temperature_celsius': 'mean',
-        'humidity': 'mean'
+        'humidity': 'mean',
+        'wind_mph': 'mean',
+        'precip_mm': 'mean'
     }).reset_index()
     
+    # Dynamic color scale based on metric
+    color_scale_map = {
+        'temperature_celsius': px.colors.diverging.RdYlBu_r,
+        'humidity': 'Teal',
+        'wind_mph': 'Purples',
+        'precip_mm': 'Blues'
+    }
+
     fig_map = px.choropleth(
         country_agg, 
         locations="country", 
         locationmode="country names",
-        color="temperature_celsius", 
+        color=map_metric, 
         hover_name="country",
-        hover_data={"humidity": ':.1f', "temperature_celsius": ':.1f'},
-        color_continuous_scale=px.colors.diverging.RdYlBu_r,
-        title="Global Average Temperature"
+        hover_data={"temperature_celsius": ':.1f', "humidity": ':.1f', "wind_mph": ':.1f', "precip_mm": ':.2f'},
+        color_continuous_scale=color_scale_map[map_metric],
+        title=f"Global Average {map_metric.replace('_', ' ').title()}"
     )
     fig_map.update_layout(margin={"r":0,"t":40,"l":0,"b":0}, geo=dict(showcoastlines=True, projection_type="equirectangular"))
     st.plotly_chart(fig_map)
@@ -165,21 +179,23 @@ elif page == "> Temperature":
 elif page == "> Time Series Analysis":
     st.title("Time Series & Rolling Averages")
     
-    st.markdown("### Daily Global Trends")
-    # Group by date for daily averages globally or per country
-    daily_temp = filtered_df.groupby('date')['temperature_celsius'].mean().reset_index()
-    # Add rolling average
-    daily_temp['7_Day_Rolling_Avg'] = daily_temp['temperature_celsius'].rolling(window=7).mean()
-    daily_temp['30_Day_Rolling_Avg'] = daily_temp['temperature_celsius'].rolling(window=30).mean()
+    st.markdown("### Country Comparison Time Series")
+    ts_countries = st.multiselect("Select Countries to Compare over Time", all_countries, default=selected_countries[:3] if selected_countries else ["United States of America", "India", "Brazil"])
     
-    fig_ts = px.line(
-        daily_temp, x='date', y=['temperature_celsius', '7_Day_Rolling_Avg', '30_Day_Rolling_Avg'],
-        labels={'value': 'Temperature (°C)', 'variable': 'Metric', 'date': 'Date'},
-        title="Global Daily Average Temperature with Rolling Averages",
-        color_discrete_sequence=['#1f77b4', '#ff7f0e', '#2ca02c']
-    )
-    fig_ts.update_layout(hovermode="x unified")
-    st.plotly_chart(fig_ts)
+    if ts_countries:
+        ts_df = filtered_df[filtered_df['country'].isin(ts_countries)]
+        daily_country_temp = ts_df.groupby(['date', 'country'])['temperature_celsius'].mean().reset_index()
+        
+        fig_ts_comp = px.line(
+            daily_country_temp, x='date', y='temperature_celsius', color='country',
+            labels={'temperature_celsius': 'Temperature (°C)', 'date': 'Date'},
+            title="Daily Average Temperature Comparison",
+            markers=True
+        )
+        fig_ts_comp.update_layout(hovermode="x unified")
+        st.plotly_chart(fig_ts_comp)
+    else:
+        st.info("Select countries above to view the time series comparison.")
     
     st.markdown("### Multi-Metric Time Series")
     metric_choice = st.selectbox("Select Metric for Trend Analysis", ["humidity", "wind_mph", "uv_index", "precip_mm", "pressure_mb"])
@@ -318,10 +334,17 @@ elif page == "> Regional Comparison":
                 )
                 st.plotly_chart(fig_violin)
                 
-            st.subheader("Temperature vs Humidity (colored by country)")
+            st.subheader("Interactive Temperature vs Humidity")
+    
+            scatter_size_metric = st.selectbox("Select Bubble Size Metric:", ["wind_mph", "precip_mm", "uv_index"], format_func=lambda x: x.replace('_', ' ').title())
+            
             fig_scatter = px.scatter(
                 comp_df, x="temperature_celsius", y="humidity", color="country",
-                hover_data=["location_name"], opacity=0.7
+                size=scatter_size_metric, size_max=40,
+                hover_name="location_name",
+                hover_data={"temperature_celsius": ':.1f', "humidity": ':.1f', scatter_size_metric: True},
+                opacity=0.7,
+                title=f"Temp vs Humidity (Size: {scatter_size_metric.replace('_', ' ').title()})"
             )
             st.plotly_chart(fig_scatter)
 
