@@ -113,8 +113,8 @@ if page == "> Overview":
         color_continuous_scale=px.colors.diverging.RdYlBu_r,
         title="Global Average Temperature"
     )
-    fig_map.update_layout(margin={"r":0,"t":40,"l":0,"b":0}, geo=dict(showcoastlines=True))
-    st.plotly_chart(fig_map, use_container_width=True)
+    fig_map.update_layout(margin={"r":0,"t":40,"l":0,"b":0}, geo=dict(showcoastlines=True, projection_type="equirectangular"))
+    st.plotly_chart(fig_map)
 
 elif page == "> Temperature":
     st.title("Temperature & Seasonal Trends")
@@ -136,7 +136,7 @@ elif page == "> Temperature":
         title="Avg Monthly Temp"
     )
     fig_line.update_layout(hovermode="x unified")
-    st.plotly_chart(fig_line, use_container_width=True)
+    st.plotly_chart(fig_line)
     
     col1, col2 = st.columns(2)
     with col1:
@@ -145,7 +145,7 @@ elif page == "> Temperature":
             filtered_df, x="temperature_celsius", nbins=40, marginal="box", 
             title="Histogram + Box", color_discrete_sequence=['#ef553b']
         )
-        st.plotly_chart(fig_hist, use_container_width=True)
+        st.plotly_chart(fig_hist)
         
     with col2:
         st.subheader("Correlation Heatmap")
@@ -156,7 +156,7 @@ elif page == "> Temperature":
             color_continuous_scale='RdBu_r', zmin=-1, zmax=1,
             title="Correlation Matrix"
         )
-        st.plotly_chart(fig_corr, use_container_width=True)
+        st.plotly_chart(fig_corr)
 
     st.markdown("---")
     st.subheader("💡 Key Insights")
@@ -179,7 +179,7 @@ elif page == "> Time Series Analysis":
         color_discrete_sequence=['#1f77b4', '#ff7f0e', '#2ca02c']
     )
     fig_ts.update_layout(hovermode="x unified")
-    st.plotly_chart(fig_ts, use_container_width=True)
+    st.plotly_chart(fig_ts)
     
     st.markdown("### Multi-Metric Time Series")
     metric_choice = st.selectbox("Select Metric for Trend Analysis", ["humidity", "wind_mph", "uv_index", "precip_mm", "pressure_mb"])
@@ -194,7 +194,7 @@ elif page == "> Time Series Analysis":
         color_discrete_sequence=['#9467bd', '#d62728']
     )
     fig_metric.update_layout(hovermode="x unified")
-    st.plotly_chart(fig_metric, use_container_width=True)
+    st.plotly_chart(fig_metric)
 
     st.markdown("---")
     st.subheader("💡 Key Insights")
@@ -234,18 +234,18 @@ elif page == "> Extreme Events":
             color_continuous_scale=color_s, size=metric_col,
             title=f"{event_type} Map"
         )
-        st.plotly_chart(fig_geo, use_container_width=True)
+        st.plotly_chart(fig_geo)
         
         col_b, col_t = st.columns([1, 1])
         with col_b:
             st.subheader(f"Distribution ({metric_col})")
             fig_box = px.box(ev_df, x='country', y=metric_col, title=f"Box Plot by Country")
-            st.plotly_chart(fig_box, use_container_width=True)
+            st.plotly_chart(fig_box)
             
         with col_t:
             st.subheader("Top Events")
             top_events = ev_df[['country', 'location_name', metric_col, 'date']].sort_values(by=metric_col, ascending=False).head(10)
-            st.dataframe(top_events, use_container_width=True, hide_index=True)
+            st.dataframe(top_events, hide_index=True)
 
     st.markdown("---")
     st.markdown("### 🚨 Statistical Anomaly Detection (Z-Score)")
@@ -269,7 +269,7 @@ elif page == "> Extreme Events":
         st.success(f"No statistical anomalies detected for {anomaly_metric} in the current selection.")
     else:
         st.warning(f"Found {len(anomalies)} anomalies for {anomaly_metric}!")
-        st.dataframe(anomalies[['country', 'location_name', 'date', anomaly_metric, 'z_score']].sort_values(by='z_score', key=abs, ascending=False).head(15), use_container_width=True)
+        st.dataframe(anomalies[['country', 'location_name', 'date', anomaly_metric, 'z_score']].sort_values(by='z_score', key=abs, ascending=False).head(15))
 
     st.markdown("---")
     st.subheader("💡 Key Insights")
@@ -308,7 +308,7 @@ elif page == "> Regional Comparison":
                     agg_comp, x=sel_metric, y='country', orientation='h', color=sel_metric,
                     color_continuous_scale='Viridis'
                 )
-                st.plotly_chart(fig_bar, use_container_width=True)
+                st.plotly_chart(fig_bar)
             
             with col2:
                 st.subheader(f"Distribution of {sel_metric_label}")
@@ -316,14 +316,14 @@ elif page == "> Regional Comparison":
                     comp_df, x='country', y=sel_metric, color='country', 
                     box=True, points="all"
                 )
-                st.plotly_chart(fig_violin, use_container_width=True)
+                st.plotly_chart(fig_violin)
                 
             st.subheader("Temperature vs Humidity (colored by country)")
             fig_scatter = px.scatter(
                 comp_df, x="temperature_celsius", y="humidity", color="country",
                 hover_data=["location_name"], opacity=0.7
             )
-            st.plotly_chart(fig_scatter, use_container_width=True)
+            st.plotly_chart(fig_scatter)
 
     st.markdown("---")
     st.subheader("💡 Key Insights")
