@@ -10,6 +10,12 @@ st.set_page_config(page_title="Climate Scope", page_icon="🌍", layout="wide")
 st.markdown("""
 <style>
 /* Clean dark theme aesthetics */
+div[data-testid="metric-container"] {
+    background-color: #1E293B;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -83,43 +89,54 @@ if page == "> Overview":
     
     st.markdown("---")
     
-    # Professional Feature: Data Expanders and Download
-    with st.expander("📊 View Filtered Dataset & Statistics"):
-        st.dataframe(filtered_df.head(100), use_container_width=True)
-        st.markdown("**Descriptive Statistics:**")
-        st.dataframe(filtered_df[['temperature_celsius', 'humidity', 'wind_mph', 'precip_mm']].describe(), use_container_width=True)
-        
-        csv_data = filtered_df.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="⬇️ Download Filtered Data as CSV",
-            data=csv_data,
-            file_name='filtered_climate_data.csv',
-            mime='text/csv',
-        )
+    st.markdown("---")
+    st.subheader("💡 Key Insights")
+    st.info("Temperature is the most spatially variable metric, driven primarily by latitude and climate zone. Global trends strongly follow seasonal variations, especially visible in the northern hemisphere.")
     
-    # Choropleth Map: Average Temperature by Country
-    st.subheader("Map: Global Average Temperature")
+
+
+    
+    # Interactive Choropleth Map
+    st.subheader("Interactive Global Map")
+    map_metric = st.selectbox("Select Metric to Visualize on Map:", 
+                              ["temperature_celsius", "humidity", "wind_mph", "precip_mm"], 
+                              format_func=lambda x: x.replace('_', ' ').title().replace('Celsius', '(°C)').replace('Mph', '(mph)').replace('Mm', '(mm)'))
+    
     country_agg = filtered_df.groupby('country').agg({
         'temperature_celsius': 'mean',
-        'humidity': 'mean'
+        'humidity': 'mean',
+        'wind_mph': 'mean',
+        'precip_mm': 'mean',
+        'iso_alpha': 'first'
     }).reset_index()
     
+    # Dynamic color scale based on metric
+    color_scale_map = {
+        'temperature_celsius': px.colors.diverging.RdYlBu_r,
+        'humidity': 'Teal',
+        'wind_mph': 'Purples',
+        'precip_mm': 'Blues'
+    }
+
     fig_map = px.choropleth(
         country_agg, 
-        locations="country", 
-        locationmode="country names",
-        color="temperature_celsius", 
+        locations="iso_alpha", 
+        locationmode="ISO-3",
+        color=map_metric, 
         hover_name="country",
-        hover_data={"humidity": ':.1f', "temperature_celsius": ':.1f'},
-        color_continuous_scale=px.colors.diverging.RdYlBu_r,
-        title="Global Average Temperature"
+        hover_data={"temperature_celsius": ':.1f', "humidity": ':.1f', "wind_mph": ':.1f', "precip_mm": ':.2f'},
+        color_continuous_scale=color_scale_map[map_metric],
+        title=f"Global Average {map_metric.replace('_', ' ').title()}"
     )
-    fig_map.update_layout(margin={"r":0,"t":40,"l":0,"b":0}, geo=dict(showcoastlines=True))
-    st.plotly_chart(fig_map, use_container_width=True)
+    fig_map.update_layout(margin={"r":0,"t":40,"l":0,"b":0}, geo=dict(showcoastlines=True, projection_type="equirectangular"))
+    st.plotly_chart(fig_map)
 
 elif page == "> Temperature":
     st.title("Temperature & Seasonal Trends")
     
+
+
+
     # Line Chart: Avg Temp by Month
     st.subheader("Average Temperature by Month")
     temp_trend = filtered_df.groupby(['month', 'country'])['temperature_celsius'].mean().reset_index()
@@ -134,7 +151,7 @@ elif page == "> Temperature":
         title="Avg Monthly Temp"
     )
     fig_line.update_layout(hovermode="x unified")
-    st.plotly_chart(fig_line, use_container_width=True)
+    st.plotly_chart(fig_line)
     
     col1, col2 = st.columns(2)
     with col1:
@@ -143,7 +160,7 @@ elif page == "> Temperature":
             filtered_df, x="temperature_celsius", nbins=40, marginal="box", 
             title="Histogram + Box", color_discrete_sequence=['#ef553b']
         )
-        st.plotly_chart(fig_hist, use_container_width=True)
+        st.plotly_chart(fig_hist)
         
     with col2:
         st.subheader("Correlation Heatmap")
@@ -154,26 +171,32 @@ elif page == "> Temperature":
             color_continuous_scale='RdBu_r', zmin=-1, zmax=1,
             title="Correlation Matrix"
         )
-        st.plotly_chart(fig_corr, use_container_width=True)
+        st.plotly_chart(fig_corr)
+
+    st.markdown("---")
+    st.subheader("💡 Key Insights")
+    st.info("UV Index and Temperature move together globally, both peaking in summer months. Humidity shows a moderate negative correlation with temperature indicating hotter regions tend to be drier.")
 
 elif page == "> Time Series Analysis":
     st.title("Time Series & Rolling Averages")
     
-    st.markdown("### Daily Global Trends")
-    # Group by date for daily averages globally or per country
-    daily_temp = filtered_df.groupby('date')['temperature_celsius'].mean().reset_index()
-    # Add rolling average
-    daily_temp['7_Day_Rolling_Avg'] = daily_temp['temperature_celsius'].rolling(window=7).mean()
-    daily_temp['30_Day_Rolling_Avg'] = daily_temp['temperature_celsius'].rolling(window=30).mean()
+    st.markdown("### Country Comparison Time Series")
+    ts_countries = st.multiselect("Select Countries to Compare over Time", all_countries, default=selected_countries[:3] if selected_countries else ["United States of America", "India", "Brazil"])
     
-    fig_ts = px.line(
-        daily_temp, x='date', y=['temperature_celsius', '7_Day_Rolling_Avg', '30_Day_Rolling_Avg'],
-        labels={'value': 'Temperature (°C)', 'variable': 'Metric', 'date': 'Date'},
-        title="Global Daily Average Temperature with Rolling Averages",
-        color_discrete_sequence=['#1f77b4', '#ff7f0e', '#2ca02c']
-    )
-    fig_ts.update_layout(hovermode="x unified")
-    st.plotly_chart(fig_ts, use_container_width=True)
+    if ts_countries:
+        ts_df = filtered_df[filtered_df['country'].isin(ts_countries)]
+        daily_country_temp = ts_df.groupby(['date', 'country'])['temperature_celsius'].mean().reset_index()
+        
+        fig_ts_comp = px.line(
+            daily_country_temp, x='date', y='temperature_celsius', color='country',
+            labels={'temperature_celsius': 'Temperature (°C)', 'date': 'Date'},
+            title="Daily Average Temperature Comparison",
+            markers=True
+        )
+        fig_ts_comp.update_layout(hovermode="x unified")
+        st.plotly_chart(fig_ts_comp)
+    else:
+        st.info("Select countries above to view the time series comparison.")
     
     st.markdown("### Multi-Metric Time Series")
     metric_choice = st.selectbox("Select Metric for Trend Analysis", ["humidity", "wind_mph", "uv_index", "precip_mm", "pressure_mb"])
@@ -188,7 +211,11 @@ elif page == "> Time Series Analysis":
         color_discrete_sequence=['#9467bd', '#d62728']
     )
     fig_metric.update_layout(hovermode="x unified")
-    st.plotly_chart(fig_metric, use_container_width=True)
+    st.plotly_chart(fig_metric)
+
+    st.markdown("---")
+    st.subheader("💡 Key Insights")
+    st.info("Strong seasonal cycles are visible in mid-latitude countries, while near-equatorial zones show less monthly temperature variation.")
 
 elif page == "> Extreme Events":
     st.title("Extreme Weather Events")
@@ -224,18 +251,18 @@ elif page == "> Extreme Events":
             color_continuous_scale=color_s, size=metric_col,
             title=f"{event_type} Map"
         )
-        st.plotly_chart(fig_geo, use_container_width=True)
+        st.plotly_chart(fig_geo)
         
         col_b, col_t = st.columns([1, 1])
         with col_b:
             st.subheader(f"Distribution ({metric_col})")
             fig_box = px.box(ev_df, x='country', y=metric_col, title=f"Box Plot by Country")
-            st.plotly_chart(fig_box, use_container_width=True)
+            st.plotly_chart(fig_box)
             
         with col_t:
             st.subheader("Top Events")
             top_events = ev_df[['country', 'location_name', metric_col, 'date']].sort_values(by=metric_col, ascending=False).head(10)
-            st.dataframe(top_events, use_container_width=True, hide_index=True)
+            st.dataframe(top_events, hide_index=True)
 
     st.markdown("---")
     st.markdown("### 🚨 Statistical Anomaly Detection (Z-Score)")
@@ -259,7 +286,11 @@ elif page == "> Extreme Events":
         st.success(f"No statistical anomalies detected for {anomaly_metric} in the current selection.")
     else:
         st.warning(f"Found {len(anomalies)} anomalies for {anomaly_metric}!")
-        st.dataframe(anomalies[['country', 'location_name', 'date', anomaly_metric, 'z_score']].sort_values(by='z_score', key=abs, ascending=False).head(15), use_container_width=True)
+        st.dataframe(anomalies[['country', 'location_name', 'date', anomaly_metric, 'z_score']].sort_values(by='z_score', key=abs, ascending=False).head(15))
+
+    st.markdown("---")
+    st.subheader("💡 Key Insights")
+    st.info("Extreme weather events (heat, rain, wind) are geographically clustered, not random. Precipitation is highly irregular and skewed — rare but extreme events dominate totals in monsoon regions.")
 
 elif page == "> Regional Comparison":
     st.title("Regional Comparison")
@@ -294,7 +325,7 @@ elif page == "> Regional Comparison":
                     agg_comp, x=sel_metric, y='country', orientation='h', color=sel_metric,
                     color_continuous_scale='Viridis'
                 )
-                st.plotly_chart(fig_bar, use_container_width=True)
+                st.plotly_chart(fig_bar)
             
             with col2:
                 st.subheader(f"Distribution of {sel_metric_label}")
@@ -302,12 +333,23 @@ elif page == "> Regional Comparison":
                     comp_df, x='country', y=sel_metric, color='country', 
                     box=True, points="all"
                 )
-                st.plotly_chart(fig_violin, use_container_width=True)
+                st.plotly_chart(fig_violin)
                 
-            st.subheader("Temperature vs Humidity (colored by country)")
+            st.subheader("Interactive Temperature vs Humidity")
+    
+            scatter_size_metric = st.selectbox("Select Bubble Size Metric:", ["wind_mph", "precip_mm", "uv_index"], format_func=lambda x: x.replace('_', ' ').title())
+            
             fig_scatter = px.scatter(
                 comp_df, x="temperature_celsius", y="humidity", color="country",
-                hover_data=["location_name"], opacity=0.7
+                size=scatter_size_metric, size_max=40,
+                hover_name="location_name",
+                hover_data={"temperature_celsius": ':.1f', "humidity": ':.1f', scatter_size_metric: True},
+                opacity=0.7,
+                title=f"Temp vs Humidity (Size: {scatter_size_metric.replace('_', ' ').title()})"
             )
-            st.plotly_chart(fig_scatter, use_container_width=True)
+            st.plotly_chart(fig_scatter)
+
+    st.markdown("---")
+    st.subheader("💡 Key Insights")
+    st.info("Regional comparisons highlight distinct climate groupings: equatorial countries dominate top temperatures while coastal/island nations lead in humidity and precipitation.")
 
