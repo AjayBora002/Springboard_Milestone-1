@@ -53,20 +53,25 @@
 ```text
 Climate_Scope/
 │
-├── data/                              # Data storage (excluded from git)
-│   ├── GlobalWeatherRepository.csv    # Raw dataset from Kaggle
-│   ├── cleaned_weather_data.csv       # Processed & cleaned dataset
-│   └── monthly_weather_summary.csv    # Aggregated monthly data
+├── data/
+│   ├── raw/                           # Raw datasets (excluded from git)
+│   │   └── GlobalWeatherRepository.csv
+│   └── processed/                     # Cleaned & aggregated data
+│       ├── cleaned_weather_data.csv
+│       └── monthly_weather_summary.csv
+│
+├── src/                               # Source code
+│   ├── dashboard.py                   # Main Streamlit app
+│   └── services/                      # API & helper services
+│       └── weather_service.py
 │
 ├── notebooks/
 │   ├── milestone1.ipynb               # M1: Data ingestion, cleaning, EDA
-│   └── milestone2_executed.ipynb      # M2: Statistical analysis & visualizations
+│   └── milestone2.ipynb               # M2: Statistical analysis & visualizations
 │
-├── reports/
-│   ├── milestone2_report.md           # M2: Full analytical findings report
-│   └── dashboard_mockup.md            # M2: Dashboard wireframe & design spec
-│
-├── requirements.txt                   # Python dependencies with version pins
+├── reports/                           # Analytical findings & mockups
+├── requirements.txt                   # Python dependencies
+├── .env.example                       # API configuration template
 ├── .gitignore                         # Excludes data files and API keys
 └── README.md                          # Project documentation
 ```
@@ -90,9 +95,11 @@ Climate_Scope/
 - **Notebook:** [`notebooks/milestone2_executed.ipynb`](notebooks/milestone2_executed.ipynb)
 - **Report:** [`reports/milestone2_report.md`](reports/milestone2_report.md)
 
-### 🔜 Milestone 3 — Interactive Dashboard (Upcoming)
-- Build interactive dashboard using Plotly Dash or Streamlit
-- Embed choropleth maps, filtered time-series views, and extreme event alert thresholds
+### ✅ Milestone 3 — Interactive Dashboard & Live API
+- Built interactive dashboard using Streamlit
+- Integrated OpenWeatherMap API for real-time global weather
+- Added Travel Assistant with live climate check
+- Reorganized project into a clean `src/` architecture
 
 ---
 
@@ -100,8 +107,8 @@ Climate_Scope/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/AjayBora002/Springboard_Milestine1.git
-cd Springboard_Milestine1
+git clone https://github.com/AjayBora002/Climate_Scope.git
+cd Climate_Scope
 ```
 
 ### 2. Install Dependencies
@@ -109,21 +116,33 @@ cd Springboard_Milestine1
 pip install -r requirements.txt
 ```
 
-### 3. Configure Kaggle API
-Place your `kaggle.json` file in the root directory.
-> ⚠️ This file is listed in `.gitignore` and will **not** be committed to Git.
+### 3. Configure API Keys
+- Place your `kaggle.json` in the root directory.
+- Create a `.env` file in the root directory and add your OpenWeatherMap API key:
+  ```text
+  OPENWEATHER_API_KEY=your_actual_key_here
+  ```
 
-### 4. Run the Analysis
-
-**Milestone 1 — Data Cleaning:**
+### 4. Run the Dashboard
 ```bash
-jupyter notebook notebooks/milestone1.ipynb
+streamlit run src/dashboard.py
 ```
 
-**Milestone 2 — Statistical Analysis & Visualizations:**
-```bash
-jupyter notebook notebooks/milestone2_executed.ipynb
-```
+---
+
+## 🚀 Streamlit Cloud Deployment
+
+To deploy this project on Streamlit Cloud:
+
+1. **GitHub Setup:** Ensure all your code (including `requirements.txt` and `src/dashboard.py`) is pushed to your GitHub repository.
+2. **Streamlit Cloud:** Sign in to [Streamlit Cloud](https://share.streamlit.io/) using your GitHub account.
+3. **Deploy App:** Click "New app", select your `Climate_Scope` repository and the `Ajay_Bora` branch.
+4. **Main File Path:** Set the "Main file path" to `src/dashboard.py`.
+5. **Secrets:** In the app settings on Streamlit Cloud, go to "Secrets" and add your API key:
+   ```toml
+   OPENWEATHER_API_KEY = "your_open_weather_api_key_here"
+   ```
+   *Note: Streamlit Cloud will automatically handle the mapping between these secrets and your `os.getenv` calls.*
 
 ---
 

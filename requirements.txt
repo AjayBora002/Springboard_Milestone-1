@@ -7,3 +7,5 @@ plotly
 nbformat
 ipykernel
 streamlit
+requests
+python-dotenv
