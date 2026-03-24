@@ -206,8 +206,8 @@ if page == "> Overview":
 
     fig_map = px.choropleth(
         country_agg, 
-        locations="iso_alpha", 
-        locationmode="ISO-3",
+        locations="country", 
+        locationmode="country names",
         color=map_metric, 
         hover_name="country",
         hover_data={"temperature_celsius": ':.1f', "humidity": ':.1f', "wind_mph": ':.1f', "precip_mm": ':.2f'},
@@ -250,12 +250,25 @@ elif page == "> Temperature":
         
     with col2:
         st.subheader("Correlation Heatmap")
-        vars_corr = ['temperature_celsius', 'humidity', 'wind_mph', 'uv_index', 'precip_mm']
-        corr_matrix = filtered_df[vars_corr].corr()
+        st.write("_What is this? This heatmap shows the relationship between **two variables** at a time. A score of **1.00** means they move perfectly together (positive), while **-1.00** means they move in opposite directions (negative)._")
+        
+        # Readable labels for the heatmap
+        vars_map = {
+            'temperature_celsius': 'Temp (°C)',
+            'humidity': 'Humidity (%)',
+            'wind_mph': 'Wind (mph)',
+            'uv_index': 'UV Index',
+            'precip_mm': 'Rain (mm)'
+        }
+        vars_corr = list(vars_map.keys())
+        
+        # Rename for the plot
+        corr_matrix = filtered_df[vars_corr].rename(columns=vars_map).corr()
+        
         fig_corr = px.imshow(
             corr_matrix, text_auto=".2f", aspect="auto",
             color_continuous_scale='RdBu_r', zmin=-1, zmax=1,
-            title="Correlation Matrix"
+            title="Statistical Correlation Matrix"
         )
         st.plotly_chart(fig_corr)
 
