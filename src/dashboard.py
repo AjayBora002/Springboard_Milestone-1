@@ -132,7 +132,7 @@ st.sidebar.caption("✅ Milestone 3 Hybrid Complete")
 
 # --- PAGE INTERFACES ---
 
-if page == "> Overview":
+if page == "> Global Overview":
     st.title("🌍 Global Weather Analytics Hub")
     st.markdown('<div class="report-card"><h4>Global Overview Highlights</h4><p>Navigate through historical trends, identify extreme anomalies, or use the Predictive View to plan for future climate risks.</p></div>', unsafe_allow_html=True)
     
@@ -190,7 +190,7 @@ if page == "> Overview":
     fig_map.update_layout(margin={"r":0,"t":40,"l":0,"b":0}, geo=dict(showcoastlines=True, projection_type="equirectangular"))
     st.plotly_chart(fig_map)
 
-elif page == "> Temperature":
+elif page == "> Temperature Trends":
     st.title("Temperature & Seasonal Trends")
     
 
@@ -252,7 +252,7 @@ elif page == "> Temperature":
     st.subheader("💡 Key Insights")
     st.info("UV Index and Temperature move together globally, both peaking in summer months. Humidity shows a moderate negative correlation with temperature indicating hotter regions tend to be drier.")
 
-elif page == "> Time Series Analysis":
+elif page == "> Seasonal Cycles":
     st.title("Time Series & Rolling Averages")
     
     st.markdown("### Country Comparison Time Series")
@@ -291,7 +291,7 @@ elif page == "> Time Series Analysis":
     st.markdown("---")
     st.markdown('<div class="report-card"><h4>Climate Trend Analysis</h4><p>Strong seasonal cycles are visible in mid-latitude countries, while near-equatorial zones show less monthly temperature variation.</p></div>', unsafe_allow_html=True)
 
-elif page == "> Extreme Events":
+elif page == "> Event Detection":
     st.title("Extreme Weather Events")
     
     st.markdown("### Identify Extreme Events")
@@ -366,7 +366,7 @@ elif page == "> Extreme Events":
     st.markdown("---")
     st.markdown('<div class="report-card"><h4>Anomaly Intelligence</h4><p>Extreme events (heat, rain, wind) are geographically clustered. Current modeling suggests a 15% increase in precipitation volatility across coastal zones.</p></div>', unsafe_allow_html=True)
 
-elif page == "> Regional Comparison":
+elif page == "> Cross-Country Compare":
     st.title("Regional Comparison")
     
     sel_countries = st.multiselect(
@@ -426,7 +426,7 @@ elif page == "> Regional Comparison":
     st.markdown("---")
     st.markdown('<div class="report-card"><h4>Regional Clustering</h4><p>Comparisons highlight distinct climate groupings: equatorial countries dominate peak temperature ranges while island nations lead in humidity saturation.</p></div>', unsafe_allow_html=True)
 
-elif page == "> Live Weather":
+elif page == "> Live City Search":
     st.title("📡 Real-Time Global Weather")
     st.markdown("Fetch live weather data for any city in the world using the OpenWeatherMap API.")
     
@@ -466,7 +466,7 @@ elif page == "> Live Weather":
                                 st.write(f"{day['temp']}°C")
                                 st.caption(day['description'])
 
-elif page == "> Travel Assistant":
+elif page == "> Travel Risk Monitor":
     st.title("🧳 Travel Climate Assistant")
     st.markdown("Plan your next trip with climate insights! Choose a destination and month to get specialized travel advice.")
     
@@ -560,7 +560,7 @@ elif page == "> Travel Assistant":
     )
     st.plotly_chart(fig_profile, width="stretch")
 
-elif page == "> Future Outlook":
+elif page == "> Predictive View":
     st.title("🔮 Future Weather Outlook")
     st.markdown("Analyze long-term temperature trends and see seasonal projections for the upcoming months.")
     
