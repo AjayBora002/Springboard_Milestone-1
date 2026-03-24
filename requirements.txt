@@ -6,6 +6,6 @@ seaborn
 plotly
 nbformat
 ipykernel
-streamlit
+streamlit==1.31.0
 requests
 python-dotenv
