@@ -11,65 +11,55 @@ st.set_page_config(page_title="Climate Scope", page_icon="🌍", layout="wide")
 st.markdown("""
 <style>
 /* Modern Premium UI/UX - Glassmorphism & Sleek Dark Mode */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
 
 html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: #E2E8F0;
 }
 
 [data-testid="stSidebar"] {
-    background-image: linear-gradient(#0F172A, #1E293B);
-    color: white;
+    background: #020617;
     border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 div[data-testid="metric-container"] {
-    background: rgba(30, 41, 59, 0.4);
+    background: rgba(15, 23, 42, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
+    border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    backdrop-filter: blur(12px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(20px);
+    transition: all 0.4s ease;
 }
 
 div[data-testid="metric-container"]:hover {
-    transform: translateY(-4px);
-    border-color: rgba(59, 130, 246, 0.5);
-    background: rgba(30, 41, 59, 0.6);
-}
-
-.stTabs [data-baseweb="tab-list"] {
-    gap: 32px;
-    padding: 10px 0;
-}
-
-.stTabs [data-baseweb="tab"] {
-    font-weight: 600;
-    color: #94A3B8;
-    transition: color 0.2s ease;
-}
-
-.stTabs [aria-selected="true"] {
-    color: #3B82F6 !important;
-    background: transparent !important;
+    transform: translateY(-5px);
+    border-color: rgba(94, 234, 212, 0.4);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
 h1, h2, h3 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 800;
-    background: linear-gradient(135deg, #FFFFFF 0%, #94A3B8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -0.02em;
+    color: #F8FAFC !important;
+    letter-spacing: -0.03em;
 }
 
-/* Custom Card Effect for Reports */
+.prof-header {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #CBD5E1;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid #3B82F6;
+    padding-left: 10px;
+}
+
 .report-card {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    padding: 20px;
-    border-left: 4px solid #3B82F6;
-    margin-bottom: 20px;
+    background: rgba(30, 41, 59, 0.3);
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 24px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -92,37 +82,34 @@ except FileNotFoundError:
 
 # --- SIDEBAR NAV & FILTERS ---
 st.sidebar.title("🌍 Climate Scope")
-st.sidebar.markdown("**Global Weather Analytics**")
+st.sidebar.markdown("**Global Analytics**")
 st.sidebar.markdown("---")
 
-category = st.sidebar.selectbox("📂 Category", ["📊 Data Analysis", "🔮 Predictions & Live"])
+category = st.sidebar.selectbox("📂 Category", ["📊 Historical Analysis", "📡 Real-Time & Forecast"])
 
-if category == "📊 Data Analysis":
+if category == "📊 Historical Analysis":
     page = st.sidebar.radio("Navigation", [
-        "> Overview", 
-        "> Temperature", 
-        "> Time Series Analysis",
-        "> Extreme Events", 
-        "> Regional Comparison"
+        "> Global Overview", 
+        "> Temperature Trends", 
+        "> Seasonal Cycles",
+        "> Event Detection", 
+        "> Cross-Country Compare"
     ])
 else:
     page = st.sidebar.radio("Navigation", [
-        "> Live Weather",
-        "> Travel Assistant",
-        "> Future Outlook"
+        "> Live City Search",
+        "> Travel Risk Monitor",
+        "> Predictive View"
     ])
 
 st.sidebar.markdown("---")
-st.sidebar.header("Global Filters")
+st.sidebar.subheader("Global Control Filter")
 
 all_countries = sorted(df['country'].dropna().unique())
-selected_countries = st.sidebar.multiselect("Select Country(s)", all_countries, default=[])
+selected_countries = st.sidebar.multiselect("Region of Interest", all_countries, placeholder="Global (Multiple Select)")
 
 months = sorted(df['month'].dropna().unique())
-if len(months) > 1:
-    month_range = st.sidebar.slider("Month Range (Jan-Dec)", min_value=int(min(months)), max_value=int(max(months)), value=(int(min(months)), int(max(months))))
-else:
-    month_range = (min(months), max(months)) if months else (1, 12)
+month_range = st.sidebar.slider("Reporting Period (Month)", min_value=1, max_value=12, value=(1, 12))
 
 # Filter dataset globally
 filtered_df = df.copy()
@@ -249,28 +236,31 @@ elif page == "> Temperature":
         st.plotly_chart(fig_hist)
         
     with col2:
-        st.subheader("Correlation Heatmap")
-        st.write("_What is this? This heatmap shows the relationship between **two variables** at a time. A score of **1.00** means they move perfectly together (positive), while **-1.00** means they move in opposite directions (negative)._")
+        st.markdown('<p class="prof-header">Correlation: Temperature vs Climate Variables</p>', unsafe_allow_html=True)
         
-        # Readable labels for the heatmap
+        # Professional labels
         vars_map = {
-            'temperature_celsius': 'Temp (°C)',
-            'humidity': 'Humidity (%)',
-            'wind_mph': 'Wind (mph)',
-            'uv_index': 'UV Index',
-            'precip_mm': 'Rain (mm)'
+            'temperature_celsius': 'Temperature',
+            'humidity': 'Humidity',
+            'wind_mph': 'Wind Speed',
+            'uv_index': 'UV Exposure',
+            'precip_mm': 'Precipitation'
         }
         vars_corr = list(vars_map.keys())
         
-        # Rename for the plot
         corr_matrix = filtered_df[vars_corr].rename(columns=vars_map).corr()
         
         fig_corr = px.imshow(
             corr_matrix, text_auto=".2f", aspect="auto",
             color_continuous_scale='RdBu_r', zmin=-1, zmax=1,
-            title="Statistical Correlation Matrix"
+            template="plotly_dark"
         )
-        st.plotly_chart(fig_corr)
+        fig_corr.update_layout(
+            margin=dict(l=0, r=0, t=20, b=0),
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)'
+        )
+        st.plotly_chart(fig_corr, use_container_width=True)
 
     st.markdown("---")
     st.subheader("💡 Key Insights")
