@@ -836,11 +836,19 @@ elif page == "🔀 Cross-Country Compare":
 elif page == "📡 Live City Search":
     st.title("📡 Real-Time Global Weather")
     st.markdown('<div class="hero-banner"><h2>Live Weather Search</h2><p>Fetch live weather data for any city in the world using the OpenWeatherMap API.</p></div>', unsafe_allow_html=True)
-    st.markdown(get_smart_narration(filtered_df, df, "LiveSearch"), unsafe_allow_html=True)
     
     city_input = st.text_input("Enter City Name (e.g., London, Mumbai, New York)", placeholder="London")
     
+    # Show narrator only after a city is entered, comparing city-matched historical data to global average
     if city_input:
+        # Try to match a city or country in the historical dataset for context
+        matched_city_df = df[df['location_name'].str.contains(city_input, case=False, na=False)]
+        if matched_city_df.empty:
+            matched_city_df = df[df['country'].str.contains(city_input, case=False, na=False)]
+        narrator_df = matched_city_df if not matched_city_df.empty else filtered_df
+        st.markdown(get_smart_narration(narrator_df, df, f"Live: {city_input.title()}"), unsafe_allow_html=True)
+    
+    if city_input:  # noqa: redefined but kept for API fetch block
         with st.spinner(f"Fetching live data for {city_input}..."):
             weather = get_live_weather(city_input)
             
@@ -877,7 +885,6 @@ elif page == "📡 Live City Search":
 elif page == "🧳 Travel Risk Monitor":
     st.title("🧳 Travel Climate Assistant")
     st.markdown('<div class="hero-banner"><h2>Travel Climate Intelligence</h2><p>Plan your next trip with historical climate insights. Choose a destination and travel month to get personalized weather advice and live forecasts.</p></div>', unsafe_allow_html=True)
-    st.markdown(get_smart_narration(filtered_df, df, "TravelHQ"), unsafe_allow_html=True)
 
     # ── Destination & Month Selectors ─────────────────────────────────
     col_dest, col_month = st.columns([1, 1])
@@ -912,6 +919,8 @@ elif page == "🧳 Travel Risk Monitor":
     avg_uv     = month_data['uv_index'].mean()
     avg_wind   = month_data['wind_mph'].mean()
 
+    # Context-aware narrator: compare this destination's historical data vs global baseline
+    st.markdown(get_smart_narration(month_data, df, f"Travel: {dest_country} ({travel_month_name})"), unsafe_allow_html=True)
     # ── Live Weather Integration ───────────────────────────────────────
     api_target   = get_location_for_api(dest_country)
     live_weather = get_live_weather(api_target)
@@ -1044,7 +1053,6 @@ elif page == "🧳 Travel Risk Monitor":
 elif page == "🔮 Predictive View":
     st.title("🔮 Future Weather Outlook")
     st.markdown('<div class="hero-banner"><h2>Predictive Intelligence</h2><p>Hybrid outlook combining live API forecasts with historical trends to project the climate ahead.</p></div>', unsafe_allow_html=True)
-    st.markdown(get_smart_narration(filtered_df, df, "Predictor"), unsafe_allow_html=True)
 
     # ── Region Selector ────────────────────────────────────────────────
     pred_country = st.selectbox(
@@ -1056,6 +1064,9 @@ elif page == "🔮 Predictive View":
     )
     target_region     = get_location_for_api(pred_country)
     pred_filtered_df  = df[df['country'] == pred_country] if pred_country else filtered_df
+
+    # Context-aware narrator: compare this region's historical data vs global baseline
+    st.markdown(get_smart_narration(pred_filtered_df, df, f"Predictor: {pred_country}"), unsafe_allow_html=True)
 
     # ── 5-Day Live Forecast ────────────────────────────────────────────
     st.markdown(f'<div class="section-label">📅 5-Day Live Outlook — {pred_country} ({target_region})</div>', unsafe_allow_html=True)
