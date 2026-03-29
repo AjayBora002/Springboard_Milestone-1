@@ -6,7 +6,10 @@
 
 **ClimateScope** is a data analytics project that analyzes and visually represents global weather patterns. By leveraging the Global Weather Repository dataset, this project uncovers seasonal trends, regional variations, and extreme weather events through statistical analysis and interactive visualizations.
 
+### 🚀 [Live Dashboard Demo](https://climatescope-pukejjiyspzs9tkfzytetj.streamlit.app/)
+
 ---
+
 
 ## 📖 Table of Contents
 - [Objective](#-objective)
@@ -144,7 +147,10 @@ To deploy this project on Streamlit Cloud:
    ```
    *Note: Streamlit Cloud will automatically handle the mapping between these secrets and your `os.getenv` calls.*
 
+**🌐 Access the Live Version:** [Streamlit Dashboard](https://climatescope-pukejjiyspzs9tkfzytetj.streamlit.app/)
+
 ---
+
 
 ## 📄 Reports
 
