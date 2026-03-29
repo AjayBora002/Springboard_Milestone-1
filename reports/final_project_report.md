@@ -50,16 +50,17 @@ The **Climate Scope** project provides a comprehensive data analytics and visual
 - **Smart Advisory:** Combined historical averages with live data to provide "Safe Travel Windows" and automated packing recommendations (e.g., Heavy Jacket for <10°C).
 - **Seasonal Profiles:** Dynamic Plotly profiles highlighting the selected travel month with categorical axis support (add_vrect).
 
-### 4.3 Predictive Intelligence (Future Outlook)
-- **6-Month Seasonal Projection:** Repeated historical patterns with **Uncertainty Bands (±1σ)** to visualize regional climate volatility.
-- **Risk Assessment:** Forward-looking cards for Heatwaves, Floods, and Solar Capacity based on historical variance.
+### 4.4 Smart Climate Narrator (Automated Intelligence)
+- **Data-Driven Storytelling:** A bespoke intelligence layer that automatically compares user-filtered datasets to global baselines.
+- **Natural Language Insights:** Generates real-time "Headlines" (e.g., "Trending 15% Drier") to help users identify anomalies without manual cross-referencing.
 
 ---
 
-## 5. UI/UX Excellence v2.0
+## 5. UI/UX Excellence v3.0
 The application has been transformed into a **Presentation-Grade Portfolio Piece**:
-- **Professional Redesign:** Implemented a bespoke "Climate Scope v2.0" design system with deep-navy glassmorphism and animated accents.
-- **Clean Mode:** Automatically hides all Streamlit native toolbars, footers, and "Deploy" widgets for a distraction-free analytics experience.
+- **Professional Redesign:** Implemented a bespoke "Climate Scope v3.0" design system with deep-navy glassmorphism and animated accents.
+- **Smart Intelligence Box:** Integrated a glowing "Narrator" badge at the top of every page for automated data summaries.
+- **Clean Mode:** Automatically hides all Streamlit native toolbars, footers, and "Deploy" widgets.
 - **Micro-Animations:** Added page fade-in transitions, input focus rings, and chart hover effects to enhance user engagement.
 - **Metric Stability:** Fixed value truncation issues on KPI cards for a pixel-perfect layout across all screen sizes.
 

@@ -357,6 +357,44 @@ hr {
 .main { animation: fadeIn 0.4s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 
+/* ── Smart Narrator v3.0 ─────────────────────────────────────── */
+.narrator-box {
+    background: linear-gradient(90deg, rgba(34,211,238,0.1) 0%, rgba(15,27,48,0.8) 100%);
+    border: 1px solid rgba(34,211,238,0.15);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--r-md);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.narrator-icon {
+    font-size: 1.5rem;
+    animation: pulse-glow 2s infinite;
+}
+@keyframes pulse-glow {
+    0% { transform: scale(1); filter: drop-shadow(0 0 0px var(--accent)); }
+    50% { transform: scale(1.1); filter: drop-shadow(0 0 8px var(--accent)); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 0px var(--accent)); }
+}
+.narrator-text {
+    font-size: 0.92rem;
+    color: var(--text-1);
+    line-height: 1.5;
+    font-weight: 500;
+}
+.narrator-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-weight: 800;
+    margin-bottom: 2px;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -396,6 +434,49 @@ def get_location_for_api(country_name: str) -> str:
     Falls back to the country name itself if no mapping found.
     """
     return _country_city_map.get(country_name, country_name)
+
+# --- SMART NARRATOR LOGIC (v3.0) ---
+def get_smart_narration(filtered_df, global_df, page_name):
+    """Generates a data-driven narrative based on the current filters."""
+    f_temp = filtered_df['temperature_celsius'].mean()
+    g_temp = global_df['temperature_celsius'].mean()
+    f_hum  = filtered_df['humidity'].mean()
+    g_hum  = global_df['humidity'].mean()
+    f_rain = filtered_df['precip_mm'].mean()
+    g_rain = global_df['precip_mm'].mean()
+    
+    # Calculate deltas
+    temp_diff = f_temp - g_temp
+    hum_diff  = ((f_hum - g_hum) / g_hum) * 100 if g_hum != 0 else 0
+    rain_diff = ((f_rain - g_rain) / g_rain) * 100 if g_rain != 0 else 0
+    
+    # Narrative assembly
+    insight = ""
+    if abs(temp_diff) > 2:
+        trend = "warmer" if temp_diff > 0 else "cooler"
+        insight += f"Selected regions are <b>{abs(temp_diff):.1f}°C {trend}</b> than the global average. "
+    
+    if abs(hum_diff) > 10:
+        hum_trend = "more humid" if hum_diff > 0 else "drier"
+        insight += f"Climate is <b>{abs(hum_diff):.0f}% {hum_trend}</b> compared to a typical baseline. "
+        
+    if abs(rain_diff) > 20:
+        rain_trend = "higher" if rain_diff > 0 else "lower"
+        insight += f"Rainfall patterns are <b>{abs(rain_diff):.0f}% {rain_trend}</b> than normal."
+
+    if not insight:
+        insight = "The current selection aligns closely with global climate baselines. Stable patterns observed."
+
+    narrative_html = f"""
+    <div class="narrator-box">
+        <div class="narrator-icon">🧠</div>
+        <div>
+            <div class="narrator-label">Climate Intelligence Narrator — {page_name}</div>
+            <div class="narrator-text">{insight}</div>
+        </div>
+    </div>
+    """
+    return narrative_html
 
 # --- SIDEBAR NAV & FILTERS ---
 st.sidebar.markdown("""
@@ -460,6 +541,7 @@ st.sidebar.markdown("""
 if page == "🌐 Global Overview":
     st.title("🌍 Global Weather Analytics Hub")
     st.markdown('<div class="hero-banner"><h2>Global Overview</h2><p>Navigate through historical trends, identify extreme anomalies, or use the Predictive View to plan for future climate risks.</p></div>', unsafe_allow_html=True)
+    st.markdown(get_smart_narration(filtered_df, df, "Overview"), unsafe_allow_html=True)
     
     # KPI Cards
     st.markdown('<div class="section-label">📊 Key Metrics</div>', unsafe_allow_html=True)
@@ -515,6 +597,7 @@ if page == "🌐 Global Overview":
 elif page == "🌡️ Temperature Trends":
     st.title("🌡️ Temperature & Seasonal Trends")
     st.markdown('<div class="hero-banner"><h2>Temperature Analysis</h2><p>Explore monthly temperature patterns, distributions, and correlations across climate variables.</p></div>', unsafe_allow_html=True)
+    st.markdown(get_smart_narration(filtered_df, df, "Trends"), unsafe_allow_html=True)
 
     # Line Chart: Avg Temp by Month
     st.markdown('<div class="section-label">📉 Monthly Trends</div>', unsafe_allow_html=True)
@@ -576,6 +659,7 @@ elif page == "🌡️ Temperature Trends":
 elif page == "📈 Seasonal Cycles":
     st.title("📈 Time Series & Rolling Averages")
     st.markdown('<div class="hero-banner"><h2>Seasonal Cycles</h2><p>Analyze multi-country temperature time series and rolling averages to detect seasonal patterns.</p></div>', unsafe_allow_html=True)
+    st.markdown(get_smart_narration(filtered_df, df, "TimeSeries"), unsafe_allow_html=True)
     
     # Use sidebar selection or default to top 3 if empty
     ts_countries = selected_countries if selected_countries else ["United States of America", "India", "Brazil"]
@@ -616,6 +700,7 @@ elif page == "📈 Seasonal Cycles":
 elif page == "⚡ Event Detection":
     st.title("⚡ Extreme Weather Events")
     st.markdown('<div class="hero-banner"><h2>Event Detection</h2><p>Identify extreme weather events and statistical anomalies across the global dataset.</p></div>', unsafe_allow_html=True)
+    st.markdown(get_smart_narration(filtered_df, df, "Anomalies"), unsafe_allow_html=True)
     
     st.markdown("### Identify Extreme Events")
     col1, col2, col3 = st.columns(3)
@@ -692,6 +777,7 @@ elif page == "⚡ Event Detection":
 elif page == "🔀 Cross-Country Compare":
     st.title("🔀 Regional Comparison")
     st.markdown('<div class="hero-banner"><h2>Cross-Country Comparison</h2><p>Compare climate metrics across multiple countries with interactive visualizations.</p></div>', unsafe_allow_html=True)
+    st.markdown(get_smart_narration(filtered_df, df, "Comparison"), unsafe_allow_html=True)
     
     # Use sidebar selection or default list
     sel_countries = selected_countries if selected_countries else ["India", "United States of America", "Brazil", "Russia", "Australia"]
@@ -750,6 +836,7 @@ elif page == "🔀 Cross-Country Compare":
 elif page == "📡 Live City Search":
     st.title("📡 Real-Time Global Weather")
     st.markdown('<div class="hero-banner"><h2>Live Weather Search</h2><p>Fetch live weather data for any city in the world using the OpenWeatherMap API.</p></div>', unsafe_allow_html=True)
+    st.markdown(get_smart_narration(filtered_df, df, "LiveSearch"), unsafe_allow_html=True)
     
     city_input = st.text_input("Enter City Name (e.g., London, Mumbai, New York)", placeholder="London")
     
@@ -790,6 +877,7 @@ elif page == "📡 Live City Search":
 elif page == "🧳 Travel Risk Monitor":
     st.title("🧳 Travel Climate Assistant")
     st.markdown('<div class="hero-banner"><h2>Travel Climate Intelligence</h2><p>Plan your next trip with historical climate insights. Choose a destination and travel month to get personalized weather advice and live forecasts.</p></div>', unsafe_allow_html=True)
+    st.markdown(get_smart_narration(filtered_df, df, "TravelHQ"), unsafe_allow_html=True)
 
     # ── Destination & Month Selectors ─────────────────────────────────
     col_dest, col_month = st.columns([1, 1])
@@ -956,6 +1044,7 @@ elif page == "🧳 Travel Risk Monitor":
 elif page == "🔮 Predictive View":
     st.title("🔮 Future Weather Outlook")
     st.markdown('<div class="hero-banner"><h2>Predictive Intelligence</h2><p>Hybrid outlook combining live API forecasts with historical trends to project the climate ahead.</p></div>', unsafe_allow_html=True)
+    st.markdown(get_smart_narration(filtered_df, df, "Predictor"), unsafe_allow_html=True)
 
     # ── Region Selector ────────────────────────────────────────────────
     pred_country = st.selectbox(
