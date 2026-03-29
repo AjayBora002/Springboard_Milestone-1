@@ -1,189 +1,80 @@
 # Dashboard Wireframe & Mockup: Climate Scope
 
-**Milestone 2 Deliverable — Interactive Dashboard Design**
+**Final Deliverable — Integrated Analytical Platform**
 
 ---
 
 ## Dashboard Overview
 
-The Climate Scope dashboard will be a **multi-panel, interactive analytics interface** with four pages. The primary goal is to give users a clear, visual exploration of global weather patterns, extreme events, and regional comparisons.
+The **Climate Scope v2.0** dashboard is a high-performance, dark-themed analytics platform featuring **seven specialized panels**. It bridges the gap between massive historical datasets (300k+ records) and real-time environmental decision-making via OpenWeatherMap API integration.
 
-**Technology Stack (planned for Milestone 3):** Plotly Dash or Streamlit
+**Technology Stack:** Streamlit, Plotly, Pandas, OpenWeatherMap API, Custom Glassmorphism CSS (Premium Redesign v2.0).
 
 ---
 
-## Layout Architecture
+## Layout Architecture (7-Panel View)
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│  🌍 CLIMATE SCOPE                          [Filters Panel] │
-│  Global Weather Analytics Dashboard                        │
+│  🌍 CLIMATE SCOPE      v2.0 Presentation Mode (No Toolbar) │
+│  [Navigation Menu]     [Global Feature Filters]            │
 ├──────────────────┬─────────────────────────────────────────┤
 │                  │                                         │
-│   SIDE NAV       │   MAIN CONTENT AREA                     │
+│   SIDERBAR       │   MAIN ANALYTICS STAGE                  │
+│   (Gradients)    │   (Animated Page Transitions)           │
 │                  │                                         │
-│ > Overview       │                                         │
-│ > Temperature    │                                         │
-│ > Precipitation  │                                         │
-│ > Extreme Events │                                         │
-│                  │                                         │
+│ > Overview       │   ┌──────────────────────────────────┐  │
+│ > Temp/Humidity  │   │      Premium KPI Hero Banner     │  │
+│ > Rain/Wind      │   └──────────────────────────────────┘  │
+│ > Extremes       │   ┌──────────────┐    ┌──────────────┐  │
+│ > Live Search    │   │ [Chart Slot] │    │ [Chart Slot] │  │
+│ > Travel Risk    │   └──────────────┘    └──────────────┘  │
+│ > Predictive     │                                         │
 └──────────────────┴─────────────────────────────────────────┘
 ```
 
 ---
 
-## Page 1: Overview / Global Map
+## Category 1: Historical Insights (Milestones 1-2)
 
-**Purpose:** Give a bird's eye view of temperature and climate across the globe.
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│  PAGE: OVERVIEW                                                        │
-│                                                                        │
-│  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │                                                                  │  │
-│  │          🗺  CHOROPLETH MAP: Global Avg Temperature               │  │
-│  │                (Color scale: Blue → Red)                         │  │
-│  │          Hover: Country | Avg Temp | Avg Humidity                │  │
-│  │                                                                  │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-│                                                                        │
-│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐           │
-│  │  KPI CARD 1    │  │  KPI CARD 2    │  │  KPI CARD 3    │           │
-│  │ 🌡 Global      │  │ 💧 Avg          │  │ 🌬 Avg Wind     │           │
-│  │  Avg Temp      │  │  Precipitation │  │  Speed         │           │
-│  │    17.4°C      │  │    0.04 mm     │  │   12.3 mph     │           │
-│  └────────────────┘  └────────────────┘  └────────────────┘           │
-│                                                                        │
-│  Filters: [Country Multiselect ▼]  [Month Slider: Jan ──── Dec]       │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-**Visualization:** Choropleth Map (Plotly Express `choropleth`)
-**Interaction:** Click country → filters all charts on page. Month slider → updates map dynamically.
+### Page 1-4: Descriptive Analytics
+- **Global Overview:** Interactive choropleth maps and regional distribution KPIs.
+- **Deep-Dive Views:** Specializing in Temperature, Precipitation/Wind, and Extreme Event anomalies using **99th percentile** threshold detection.
+- **Interaction:** Synchronized filters for month-of-year and regional granularity.
 
 ---
 
-## Page 2: Temperature & Seasonal Trends
+## Category 2: Real-Time & Forecasting (Milestones 3-4)
 
-**Purpose:** Explore temperature distributions and seasonal patterns.
+### Page 5: 📡 Live Global Search
+- **Functionality:** Direct API bridge to OpenWeatherMap.
+- **Features:** Instant weather retrieval, local sunrise/sunset, and localized time display for any city globally.
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│  PAGE: TEMPERATURE ANALYSIS                                            │
-│                                                                        │
-│  ┌──────────────────────────────┐  ┌──────────────────────────────┐   │
-│  │ 📈 LINE CHART                │  │ 📊 HISTOGRAM                 │   │
-│  │ Avg Temperature by Month     │  │ Distribution of Temperature  │   │
-│  │ (multiple countries overlay) │  │ with KDE curve               │   │
-│  │                              │  │                              │   │
-│  │  Y: Temp (°C)                │  │  X: Temp range               │   │
-│  │  X: Month (Jan-Dec)          │  │  Y: Frequency count          │   │
-│  └──────────────────────────────┘  └──────────────────────────────┘   │
-│                                                                        │
-│  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │ 🟦 HEATMAP: Correlation Matrix of Weather Variables               │  │
-│  │  (Temp, Humidity, Wind, UV, Precipitation)                       │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-│                                                                        │
-│  Filters: [Region ▼]  [Date Range: Month Slider]                      │
-└────────────────────────────────────────────────────────────────────────┘
-```
+### Page 6: 🧳 Travel Risk Monitor
+- **Fusion Logic:** Combines historical seasonal profiles with a **5-Day Live Forecast**.
+- **Advisory:** Smart weather advice (Packing, Safety, Comfort Scores) generated from historical stability patterns.
 
-**Visualizations:** Line Chart, Histogram+KDE, Correlation Heatmap
+### Page 7: 🔮 Predictive Outlook
+- **Predictive Intelligence:** Seasonal projections with **Uncertainty Bands (Standard Deviation)**.
+- **Risk Assessment:** Forward-looking hazard cards (Heatwave, Flood, Solar Capacity) for long-term strategic planning.
 
 ---
 
-## Page 3: Extreme Weather Events
+## Visualization & Interaction Summary
 
-**Purpose:** Highlight and explore notable extreme weather observations.
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│  PAGE: EXTREME EVENTS                                                  │
-│                                                                        │
-│  [Toggle: 🌡 Extreme Heat | 🌧 Heavy Rain | 🌬 High Wind]              │
-│                                                                        │
-│  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │         🗺  MAP: Locations of Extreme Events (Scatter Geo)        │  │
-│  │         (Each dot = one extreme event; color by type)            │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-│                                                                        │
-│  ┌──────────────────────────────┐  ┌──────────────────────────────┐   │
-│  │ 📦 BOX PLOT                  │  │ 📋 TABLE: Top 10 Events       │   │
-│  │ Temp distribution by region  │  │ Country | Loc | Value | Date  │   │
-│  │ with outliers visible        │  │ (sortable, filtered by type)  │   │
-│  │                              │  │                              │   │
-│  └──────────────────────────────┘  └──────────────────────────────┘   │
-│                                                                        │
-│  Threshold Sliders: [Heat > __ °C]  [Rain > __ mm]  [Wind > __ mph]  │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-**Visualizations:** Scatter Geo Map, Box Plot, Sortable Table
-
----
-
-## Page 4: Regional Comparison
-
-**Purpose:** Side-by-side comparison of weather conditions across countries/regions.
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│  PAGE: REGIONAL COMPARISON                                             │
-│                                                                        │
-│  [Select Countries: India, USA, Brazil, Russia ▼]                     │
-│  [Select Metric: Temperature ▼]                                        │
-│                                                                        │
-│  ┌──────────────────────────────────────────────────────────────────┐  │
-│  │ 📊 HORIZONTAL BAR CHART                                          │  │
-│  │ Average [selected metric] by Country — sorted descending         │  │
-│  └──────────────────────────────────────────────────────────────────┘  │
-│                                                                        │
-│  ┌──────────────────────────────┐  ┌──────────────────────────────┐   │
-│  │ 🎻 VIOLIN PLOT               │  │ 🔵 SCATTERPLOT               │   │
-│  │ Temperature distribution     │  │ Temperature vs Humidity      │   │
-│  │ by selected countries        │  │ (coloured by country)        │   │
-│  └──────────────────────────────┘  └──────────────────────────────┘   │
-│                                                                        │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-**Visualizations:** Bar Chart, Violin Plot, Scatterplot
-
----
-
-## Visualization Type Summary
-
-| Dashboard Panel | Chart Type | Library |
+| Component | Implementation | Feature |
 |---|---|---|
-| Global temperature map | Choropleth Map | Plotly Express |
-| Seasonal trends | Line Chart | Seaborn / Plotly |
-| Temperature distribution | Histogram + KDE | Seaborn |
-| Variable correlations | Correlation Heatmap | Seaborn |
-| Extreme events map | Scatter Geo Map | Plotly Express |
-| Distribution by region | Box Plot / Violin Plot | Plotly / Seaborn |
-| Regional comparison | Horizontal Bar Chart | Plotly / Seaborn |
-| Temp vs. Humidity | Scatterplot | Seaborn / Plotly |
+| **Design System** | Glassmorphism v2.0 | Absolute clean mode (hidden Streamlit UI) |
+| **KPI Cards** | Custom CSS + SVG | Animated hover scales & focus rings |
+| **Trend Lines** | Plotly GO | Multi-line seasonal overlays with highlight bands |
+| **Forecasts** | HTML Component | Responsive 5-day grid with weather-sync icons |
+| **Animations** | CSS Keyframes | Sequential fade-in on page navigation |
 
 ---
 
-## Interaction & Filter Design
+## Design Evolution Notes (v2.0)
 
-| Filter | Location | Effect |
-|---|---|---|
-| Country/Region Dropdown | Top-right filter panel | All charts update for selected region |
-| Month Slider | Top-right filter panel | All charts filter to selected month range |
-| Extreme Event Toggle | Page 3 header | Toggles between heat / rain / wind extreme views |
-| Metric Selector | Page 4 header | Switches the metric shown in comparison charts |
-| Threshold Sliders | Page 3 bottom | Adjusts what counts as "extreme" for each variable |
-
----
-
-## Color Scheme / Design Notes
-
-- **Background:** Dark (#0F172A) with bright, vibrant accent colors
-- **Temperature color scale:** Blue (cold) → Yellow → Red (hot) — perceptually intuitive
-- **Card background:** Semi-transparent glass effect (#1E293B)
-- **Font:** Inter or Roboto
-- **Interactive elements:** Hover tooltips on all charts
+- **Presentation Ready:** All Streamlit native "Deploy" and "Stop" buttons are programmatically hidden.
+- **Responsive Font:** Plus Jakarta Sans with fluid `clamp()` sizing for headings.
+- **Ambient Lighting:** Contextual radial glows on cards based on weather severity (Danger/Warning/Success).
+- **Metric Stability:** Fixed container widths to prevent UI jumping during data reloads.
