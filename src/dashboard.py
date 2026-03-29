@@ -526,13 +526,9 @@ if filtered_df.empty:
     st.stop()
 
 
-st.sidebar.markdown("---")
 st.sidebar.markdown("""
 <div class="sidebar-footer">
-    <strong>Climate Scope</strong> v1.0<br>
-    Built by <strong>Ajay Bora</strong><br>
-    Updated March 2026<br>
-    ✅ Milestone 3 Complete
+    <strong>Climate Scope</strong>
 </div>
 """, unsafe_allow_html=True)
 
