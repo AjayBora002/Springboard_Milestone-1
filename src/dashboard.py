@@ -728,30 +728,52 @@ elif page == "📈 Seasonal Cycles":
     else:
         st.info("💡 Select countries in the sidebar to compare their climate trends over time.")
     
-    st.markdown('<div class="section-label">📊 Monthly Distribution & Seasonality</div>', unsafe_allow_html=True)
-    metric_choice = st.selectbox("Select Metric for Seasonal Profile", ["temperature_celsius", "humidity", "wind_mph", "uv_index", "precip_mm"], index=0)
+    # New Plot 2: Combined Climograph (Temperature & Rainfall Story)
+    st.markdown('<div class="section-label">📊 Regional Climate Signature (Climograph)</div>', unsafe_allow_html=True)
     
-    # Define month order for consistent X-axis sorting
+    # Calculate monthly averages for the signature
     month_order = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    monthly_stats = filtered_df.groupby('month_name').agg({
+        'temperature_celsius': 'mean',
+        'precip_mm': 'mean'
+    }).reindex(month_order).reset_index()
     
-    fig_seasonal = px.box(
-        filtered_df, 
-        x='month_name', 
-        y=metric_choice,
-        category_orders={'month_name': month_order},
-        labels={'month_name': 'Month', metric_choice: metric_choice.replace('_', ' ').title()},
-        title=f"Monthly Distribution of {metric_choice.replace('_', ' ').title()}",
-        color_discrete_sequence=[PALETTE["cyan"]]
+    # Dual-axis chart
+    fig_clim = go.Figure()
+    
+    # Precipitation (Bars)
+    fig_clim.add_trace(go.Bar(
+        x=monthly_stats['month_name'], 
+        y=monthly_stats['precip_mm'],
+        name='Precipitation (mm)',
+        marker_color='rgba(34, 211, 238, 0.4)',
+        marker_line_color='rgba(34, 211, 238, 0.8)',
+        marker_line_width=1.5,
+        yaxis='y'
+    ))
+    
+    # Temperature (Line)
+    fig_clim.add_trace(go.Scatter(
+        x=monthly_stats['month_name'], 
+        y=monthly_stats['temperature_celsius'],
+        name='Temperature (°C)',
+        mode='lines+markers',
+        line=dict(color='#F43F5E', width=3),
+        marker=dict(size=8, symbol='circle'),
+        yaxis='y2'
+    ))
+    
+    fig_clim.update_layout(
+        title="Monthly Temperature & Rainfall Baseline",
+        xaxis=dict(title="", showgrid=False),
+        yaxis=dict(title="Precipitation (mm)", side="left", showgrid=False, range=[0, monthly_stats['precip_mm'].max() * 1.2 if not monthly_stats.empty else 10]),
+        yaxis2=dict(title="Temperature (°C)", side="right", overlaying="y", showgrid=True, gridcolor="rgba(255,255,255,0.05)"),
+        legend=dict(bgcolor="rgba(0,0,0,0)", yanchor="top", y=1.2, xanchor="right", x=1, orientation="h"),
+        hovermode="x unified",
+        margin=dict(l=20, r=20, t=60, b=20)
     )
     
-    fig_seasonal.update_layout(
-        xaxis=dict(showgrid=False),
-        yaxis=dict(gridcolor="rgba(255,255,255,0.05)"),
-        plot_bgcolor="rgba(0,0,0,0)",
-        paper_bgcolor="rgba(0,0,0,0)"
-    )
-    
-    st.plotly_chart(fig_seasonal, use_container_width=True)
+    st.plotly_chart(fig_clim, use_container_width=True)
 
     st.markdown("---")
     st.markdown('<div class="glass-card"><h4>Climate Trend Analysis</h4><p>Strong seasonal cycles are visible in mid-latitude countries, while near-equatorial zones show less monthly temperature variation.</p></div>', unsafe_allow_html=True)
