@@ -417,6 +417,71 @@ except FileNotFoundError:
     st.stop()
 
 # ── Country → Representative City Mapping ─────────────────────────────
+# --- SMART NARRATOR LOGIC (v4.0 Context-Aware) ---
+def _narrate(icon, label, text):
+    return f"""
+    <div class="narrator-box">
+        <div class="narrator-icon">{icon}</div>
+        <div>
+            <div class="narrator-label">Climate Intelligence — {label}</div>
+            <div class="narrator-text">{text}</div>
+        </div>
+    </div>
+    """
+
+def get_overview_intelligence(filtered_df):
+    """Provides high-level rankings and geospatial insights."""
+    if filtered_df.empty: return ""
+    top_country = filtered_df.groupby('country')['temperature_celsius'].mean().idxmax()
+    top_temp = filtered_df.groupby('country')['temperature_celsius'].mean().max()
+    avg_hum = filtered_df['humidity'].mean()
+    
+    insight = f"<b>{top_country}</b> is currently the warmest region in this selection at <b>{top_temp:.1f}°C</b>. "
+    insight += f"Regional humidity averages <b>{avg_hum:.0f}%</b>, indicating a "
+    insight += "humid profile." if avg_hum > 60 else "dry climate profile."
+    
+    return _narrate("🌍", "Global Overview", insight)
+
+def get_trend_intelligence(filtered_df):
+    """Focuses on statistical distributions and variable correlations."""
+    if filtered_df.empty: return ""
+    corr = filtered_df[['temperature_celsius', 'uv_index']].corr().iloc[0,1]
+    temp_range = filtered_df['temperature_celsius'].max() - filtered_df['temperature_celsius'].min()
+    
+    strength = "strong" if abs(corr) > 0.7 else "moderate"
+    insight = f"There is a <b>{strength} correlation ({corr:.2f})</b> between UV Index and Temperature. "
+    insight += f"The thermal distribution shows a <b>{temp_range:.1f}°C spread</b> across the reporting period."
+    
+    return _narrate("🌡️", "Trend Analysis", insight)
+
+def get_event_intelligence(filtered_df, heat_t, rain_t):
+    """Detects and reports on extreme weather events and anomalies."""
+    if filtered_df.empty: return ""
+    heat_events = len(filtered_df[filtered_df['temperature_celsius'] >= heat_t])
+    rain_events = len(filtered_df[filtered_df['precip_mm'] >= rain_t])
+    
+    insight = f"Identified <b>{heat_events} extreme heat</b> incidents and <b>{rain_events} heavy rainfall</b> events. "
+    if heat_events > 5 or rain_events > 5:
+        insight += "Current data suggests a high-volatility weather pattern."
+    else:
+        insight += "Weather extremes remain within expected historical bounds."
+        
+    return _narrate("⚡", "Event Intelligence", insight)
+
+def get_comparison_intelligence(filtered_df, selected_countries):
+    """Provides dynamic contrast between selected regions."""
+    if len(selected_countries) < 2:
+        return _narrate("🔀", "Regional Comparison", "Select two or more countries to enable comparative intelligence.")
+    
+    stats = filtered_df.groupby('country')['temperature_celsius'].mean()
+    c1, c2 = stats.idxmax(), stats.idxmin()
+    diff = stats.max() - stats.min()
+    
+    insight = f"<b>{c1}</b> is the warmest in this set, averaging <b>{diff:.1f}°C more</b> than <b>{c2}</b>. "
+    insight += "This thermal gap highlights significant latitudinal or altitudinal climatic variance."
+    
+    return _narrate("🔀", "Regional Comparison", insight)
+
 @st.cache_data
 def build_country_city_map(_df):
     """Build a country → most common city mapping from the dataset."""
@@ -435,101 +500,6 @@ def get_location_for_api(country_name: str) -> str:
     """
     return _country_city_map.get(country_name, country_name)
 
-# --- SMART NARRATOR LOGIC (v3.0) ---
-def get_smart_narration(filtered_df, global_df, page_name):
-    """Generates a data-driven narrative based on the current filters."""
-    f_temp = filtered_df['temperature_celsius'].mean()
-    g_temp = global_df['temperature_celsius'].mean()
-    f_hum  = filtered_df['humidity'].mean()
-    g_hum  = global_df['humidity'].mean()
-    f_rain = filtered_df['precip_mm'].mean()
-    g_rain = global_df['precip_mm'].mean()
-    
-    # Calculate deltas
-    temp_diff = f_temp - g_temp
-    hum_diff  = ((f_hum - g_hum) / g_hum) * 100 if g_hum != 0 else 0
-    rain_diff = ((f_rain - g_rain) / g_rain) * 100 if g_rain != 0 else 0
-    
-    # Narrative assembly
-    insight = ""
-    if abs(temp_diff) > 2:
-        trend = "warmer" if temp_diff > 0 else "cooler"
-        insight += f"Selected regions are <b>{abs(temp_diff):.1f}°C {trend}</b> than the global average. "
-    
-    if abs(hum_diff) > 10:
-        hum_trend = "more humid" if hum_diff > 0 else "drier"
-        insight += f"Climate is <b>{abs(hum_diff):.0f}% {hum_trend}</b> compared to a typical baseline. "
-        
-    if abs(rain_diff) > 20:
-        rain_trend = "higher" if rain_diff > 0 else "lower"
-        insight += f"Rainfall patterns are <b>{abs(rain_diff):.0f}% {rain_trend}</b> than normal."
-
-    if not insight:
-        insight = "The current selection aligns closely with global climate baselines. Stable patterns observed."
-
-    narrative_html = f"""
-    <div class="narrator-box">
-        <div class="narrator-icon">🧠</div>
-        <div>
-            <div class="narrator-label">Climate Intelligence Narrator — {page_name}</div>
-            <div class="narrator-text">{insight}</div>
-        </div>
-    </div>
-    """
-    return narrative_html
-
-def get_seasonal_intelligence(filtered_df, page_name):
-    """Calculates seasonal shifts and provides a narrative contrast."""
-    # Northern Hemisphere standard season mapping
-    def determine_season(m):
-        if m in [12, 1, 2]: return "Winter"
-        if m in [3, 4, 5]:  return "Spring"
-        if m in [6, 7, 8]:  return "Summer"
-        return "Autumn"
-    
-    sdf = filtered_df.copy()
-    if 'month' not in sdf.columns or sdf.empty:
-        return "Not enough data for seasonal analytics."
-        
-    sdf['season'] = sdf['month'].apply(determine_season)
-    
-    seasonal_stats = sdf.groupby('season').agg({
-        'temperature_celsius': 'mean',
-        'precip_mm': 'mean'
-    }).to_dict('index')
-    
-    seasons_available = list(seasonal_stats.keys())
-    if not seasons_available:
-        return ""
-    
-    hottest_s = max(seasonal_stats, key=lambda k: seasonal_stats[k]['temperature_celsius'])
-    coldest_s = min(seasonal_stats, key=lambda k: seasonal_stats[k]['temperature_celsius'])
-    wettest_s = max(seasonal_stats, key=lambda k: seasonal_stats[k]['precip_mm'])
-    
-    h_temp = seasonal_stats[hottest_s]['temperature_celsius']
-    c_temp = seasonal_stats[coldest_s]['temperature_celsius']
-    w_rain = seasonal_stats[wettest_s]['precip_mm']
-    swing  = h_temp - c_temp
-    
-    # Dynamic narrative assembly
-    insight = f"The <b>{hottest_s}</b> is the warmest period, peaking at <b>{h_temp:.1f}°C</b>. "
-    
-    if hottest_s != coldest_s:
-        insight += f"In contrast, <b>{coldest_s}</b> averages <b>{c_temp:.1f}°C</b>, representing a <b>{swing:.1f}°C seasonal swing</b>. "
-    
-    if w_rain > 0.5:
-        insight += f"Rainfall peaks during <b>{wettest_s}</b> at <b>{w_rain:.2f}mm</b> avg."
-
-    narrative_html = f"""
-    <div class="narrator-box">
-        <div class="narrator-icon">🌓</div>
-        <div>
-            <div class="narrator-label">Seasonal Intelligence — {page_name}</div>
-            <div class="narrator-text">{insight}</div>
-        </div>
-    </div>
-    """
-    return narrative_html
 
 # --- SIDEBAR NAV & FILTERS ---
 st.sidebar.markdown("""
@@ -590,7 +560,7 @@ st.sidebar.markdown("""
 if page == "🌐 Global Overview":
     st.title("🌍 Global Weather Analytics Hub")
     st.markdown('<div class="hero-banner"><h2>Global Overview</h2><p>Navigate through historical trends, identify extreme anomalies, or use the Predictive View to plan for future climate risks.</p></div>', unsafe_allow_html=True)
-    st.markdown(get_smart_narration(filtered_df, df, "Overview"), unsafe_allow_html=True)
+    st.markdown(get_overview_intelligence(filtered_df), unsafe_allow_html=True)
     
     # KPI Cards
     st.markdown('<div class="section-label">📊 Key Metrics</div>', unsafe_allow_html=True)
@@ -646,7 +616,7 @@ if page == "🌐 Global Overview":
 elif page == "🌡️ Temperature Trends":
     st.title("🌡️ Temperature & Seasonal Trends")
     st.markdown('<div class="hero-banner"><h2>Temperature Analysis</h2><p>Explore monthly temperature patterns, distributions, and correlations across climate variables.</p></div>', unsafe_allow_html=True)
-    st.markdown(get_smart_narration(filtered_df, df, "Trends"), unsafe_allow_html=True)
+    st.markdown(get_trend_intelligence(filtered_df), unsafe_allow_html=True)
 
     # Line Chart: Avg Temp by Month
     st.markdown('<div class="section-label">📉 Monthly Trends</div>', unsafe_allow_html=True)
@@ -798,7 +768,7 @@ elif page == "📈 Seasonal Cycles":
 elif page == "⚡ Event Detection":
     st.title("⚡ Extreme Weather Events")
     st.markdown('<div class="hero-banner"><h2>Event Detection</h2><p>Identify extreme weather events and statistical anomalies across the global dataset.</p></div>', unsafe_allow_html=True)
-    st.markdown(get_smart_narration(filtered_df, df, "Anomalies"), unsafe_allow_html=True)
+    st.markdown(get_event_intelligence(filtered_df, heat_thresh, rain_thresh), unsafe_allow_html=True)
     
     st.markdown("### Identify Extreme Events")
     col1, col2, col3 = st.columns(3)
@@ -875,7 +845,7 @@ elif page == "⚡ Event Detection":
 elif page == "🔀 Cross-Country Compare":
     st.title("🔀 Regional Comparison")
     st.markdown('<div class="hero-banner"><h2>Cross-Country Comparison</h2><p>Compare climate metrics across multiple countries with interactive visualizations.</p></div>', unsafe_allow_html=True)
-    st.markdown(get_smart_narration(filtered_df, df, "Comparison"), unsafe_allow_html=True)
+    st.markdown(get_comparison_intelligence(filtered_df, selected_countries), unsafe_allow_html=True)
     
     # Use sidebar selection or default list
     sel_countries = selected_countries if selected_countries else ["India", "United States of America", "Brazil", "Russia", "Australia"]
@@ -944,7 +914,7 @@ elif page == "📡 Live City Search":
         if matched_city_df.empty:
             matched_city_df = df[df['country'].str.contains(city_input, case=False, na=False)]
         narrator_df = matched_city_df if not matched_city_df.empty else filtered_df
-        st.markdown(get_smart_narration(narrator_df, df, f"Live: {city_input.title()}"), unsafe_allow_html=True)
+        st.markdown(get_overview_intelligence(narrator_df), unsafe_allow_html=True)
     
     if city_input:  # noqa: redefined but kept for API fetch block
         with st.spinner(f"Fetching live data for {city_input}..."):
@@ -1018,7 +988,7 @@ elif page == "🧳 Travel Risk Monitor":
     avg_wind   = month_data['wind_mph'].mean()
 
     # Context-aware narrator: compare this destination's historical data vs global baseline
-    st.markdown(get_smart_narration(month_data, df, f"Travel: {dest_country} ({travel_month_name})"), unsafe_allow_html=True)
+    st.markdown(get_overview_intelligence(month_data), unsafe_allow_html=True)
     # ── Live Weather Integration ───────────────────────────────────────
     api_target   = get_location_for_api(dest_country)
     live_weather = get_live_weather(api_target)
@@ -1164,7 +1134,7 @@ elif page == "🔮 Predictive View":
     pred_filtered_df  = df[df['country'] == pred_country] if pred_country else filtered_df
 
     # Context-aware narrator: compare this region's historical data vs global baseline
-    st.markdown(get_smart_narration(pred_filtered_df, df, f"Predictor: {pred_country}"), unsafe_allow_html=True)
+    st.markdown(get_trend_intelligence(pred_filtered_df), unsafe_allow_html=True)
 
     # ── 5-Day Live Forecast ────────────────────────────────────────────
     st.markdown(f'<div class="section-label">📅 5-Day Live Outlook — {pred_country} ({target_region})</div>', unsafe_allow_html=True)
