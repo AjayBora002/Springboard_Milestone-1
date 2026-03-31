@@ -773,6 +773,23 @@ elif page == "📈 Seasonal Cycles":
         margin=dict(l=20, r=20, t=60, b=20)
     )
     
+    # Seasonal Shading (In-Plot Insights)
+    # Mapping based on the month_order indices
+    seasons = [
+        (-0.5, 1.5, "WINTER", "rgba(59, 130, 246, 0.07)"),   # Jan, Feb
+        (1.5, 4.5, "SPRING", "rgba(52, 211, 153, 0.07)"),   # Mar, Apr, May
+        (4.5, 7.5, "SUMMER", "rgba(245, 158, 11, 0.07)"),   # Jun, Jul, Aug
+        (7.5, 10.5, "AUTUMN", "rgba(167, 139, 250, 0.07)"), # Sep, Oct, Nov
+        (10.5, 11.5, "WINTER", "rgba(59, 130, 246, 0.07)"),  # Dec
+    ]
+    
+    for x0, x1, label, color in seasons:
+        fig_clim.add_vrect(
+            x0=x0, x1=x1, fillcolor=color, opacity=1, layer="below", line_width=0,
+            annotation_text=label, annotation_position="top left",
+            annotation_font=dict(size=9, color="rgba(255,255,255,0.25)", weight="bold")
+        )
+
     st.plotly_chart(fig_clim, use_container_width=True)
 
     st.markdown("---")
