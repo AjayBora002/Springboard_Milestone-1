@@ -812,13 +812,14 @@ elif page == "📈 Seasonal Cycles":
 elif page == "⚡ Event Detection":
     st.title("⚡ Extreme Weather Events")
     st.markdown('<div class="hero-banner"><h2>Event Detection</h2><p>Identify extreme weather events and statistical anomalies across the global dataset.</p></div>', unsafe_allow_html=True)
-    st.markdown(get_event_intelligence(filtered_df, heat_thresh, rain_thresh), unsafe_allow_html=True)
     
     st.markdown("### Identify Extreme Events")
     col1, col2, col3 = st.columns(3)
     heat_thresh = col1.slider("Extreme Heat Threshold (°C)", min_value=30.0, max_value=55.0, value=40.0, step=1.0)
     rain_thresh = col2.slider("Heavy Rain Threshold (mm)", min_value=1.0, max_value=100.0, value=20.0, step=1.0)
     wind_thresh = col3.slider("High Wind Threshold (mph)", min_value=10.0, max_value=150.0, value=30.0, step=1.0)
+    
+    st.markdown(get_event_intelligence(filtered_df, heat_thresh, rain_thresh), unsafe_allow_html=True)
     
     event_type = st.radio("Select Event Type to View:", ["Extreme Heat", "Heavy Rain", "High Wind"], horizontal=True)
     
