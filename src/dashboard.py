@@ -482,6 +482,50 @@ def get_comparison_intelligence(filtered_df, selected_countries):
     
     return _narrate("🔀", "Regional Comparison", insight)
 
+def get_seasonal_intelligence(filtered_df, page_name):
+    """Calculates seasonal shifts and provides a narrative contrast."""
+    # Northern Hemisphere standard season mapping
+    def determine_season(m):
+        if m in [12, 1, 2]: return "Winter"
+        if m in [3, 4, 5]:  return "Spring"
+        if m in [6, 7, 8]:  return "Summer"
+        return "Autumn"
+    
+    sdf = filtered_df.copy()
+    if 'month' not in sdf.columns or sdf.empty:
+        return "Not enough data for seasonal analytics."
+        
+    sdf['season'] = sdf['month'].apply(determine_season)
+    
+    seasonal_stats = sdf.groupby('season').agg({
+        'temperature_celsius': 'mean',
+        'precip_mm': 'mean'
+    }).to_dict('index')
+    
+    seasons_available = list(seasonal_stats.keys())
+    if not seasons_available:
+        return ""
+    
+    hottest_s = max(seasonal_stats, key=lambda k: seasonal_stats[k]['temperature_celsius'])
+    coldest_s = min(seasonal_stats, key=lambda k: seasonal_stats[k]['temperature_celsius'])
+    wettest_s = max(seasonal_stats, key=lambda k: seasonal_stats[k]['precip_mm'])
+    
+    h_temp = seasonal_stats[hottest_s]['temperature_celsius']
+    c_temp = seasonal_stats[coldest_s]['temperature_celsius']
+    w_rain = seasonal_stats[wettest_s]['precip_mm']
+    swing  = h_temp - c_temp
+    
+    # Dynamic narrative assembly
+    insight = f"The <b>{hottest_s}</b> is the warmest period, peaking at <b>{h_temp:.1f}°C</b>. "
+    
+    if hottest_s != coldest_s:
+        insight += f"In contrast, <b>{coldest_s}</b> averages <b>{c_temp:.1f}°C</b>, representing a <b>{swing:.1f}°C seasonal swing</b>. "
+    
+    if w_rain > 0.5:
+        insight += f"Rainfall peaks during <b>{wettest_s}</b> at <b>{w_rain:.2f}mm</b> avg."
+
+    return _narrate("🌓", f"Seasonal Intelligence — {page_name}", insight)
+
 @st.cache_data
 def build_country_city_map(_df):
     """Build a country → most common city mapping from the dataset."""
