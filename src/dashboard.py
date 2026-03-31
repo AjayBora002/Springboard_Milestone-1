@@ -675,20 +675,30 @@ elif page == "📈 Seasonal Cycles":
     else:
         st.info("💡 Select countries in the sidebar to compare their climate trends over time.")
     
-    st.markdown('<div class="section-label">📊 Multi-Metric Analysis</div>', unsafe_allow_html=True)
-    metric_choice = st.selectbox("Select Metric for Trend Analysis", ["humidity", "wind_mph", "uv_index", "precip_mm", "pressure_mb"])
+    st.markdown('<div class="section-label">📊 Monthly Distribution & Seasonality</div>', unsafe_allow_html=True)
+    metric_choice = st.selectbox("Select Metric for Seasonal Profile", ["temperature_celsius", "humidity", "wind_mph", "uv_index", "precip_mm"], index=0)
     
-    daily_metric = filtered_df.groupby('date')[metric_choice].mean().reset_index()
-    daily_metric['7_Day_Rolling_Avg'] = daily_metric[metric_choice].rolling(window=7).mean()
+    # Define month order for consistent X-axis sorting
+    month_order = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     
-    fig_metric = px.line(
-        daily_metric, x='date', y=[metric_choice, '7_Day_Rolling_Avg'],
-        labels={'value': f"{metric_choice.replace('_', ' ').title()}", 'variable': 'Metric', 'date': 'Date'},
-        title=f"Global Daily Average {metric_choice.replace('_', ' ').title()} (7-Day Rolling)",
-        color_discrete_sequence=['#9467bd', '#d62728']
+    fig_seasonal = px.box(
+        filtered_df, 
+        x='month_name', 
+        y=metric_choice,
+        category_orders={'month_name': month_order},
+        labels={'month_name': 'Month', metric_choice: metric_choice.replace('_', ' ').title()},
+        title=f"Monthly Distribution of {metric_choice.replace('_', ' ').title()}",
+        color_discrete_sequence=[PALETTE["cyan"]]
     )
-    fig_metric.update_layout(hovermode="x unified")
-    st.plotly_chart(fig_metric, use_container_width=True)
+    
+    fig_seasonal.update_layout(
+        xaxis=dict(showgrid=False),
+        yaxis=dict(gridcolor="rgba(255,255,255,0.05)"),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)"
+    )
+    
+    st.plotly_chart(fig_seasonal, use_container_width=True)
 
     st.markdown("---")
     st.markdown('<div class="glass-card"><h4>Climate Trend Analysis</h4><p>Strong seasonal cycles are visible in mid-latitude countries, while near-equatorial zones show less monthly temperature variation.</p></div>', unsafe_allow_html=True)
