@@ -478,6 +478,59 @@ def get_smart_narration(filtered_df, global_df, page_name):
     """
     return narrative_html
 
+def get_seasonal_intelligence(filtered_df, page_name):
+    """Calculates seasonal shifts and provides a narrative contrast."""
+    # Northern Hemisphere standard season mapping
+    def determine_season(m):
+        if m in [12, 1, 2]: return "Winter"
+        if m in [3, 4, 5]:  return "Spring"
+        if m in [6, 7, 8]:  return "Summer"
+        return "Autumn"
+    
+    sdf = filtered_df.copy()
+    if 'month' not in sdf.columns or sdf.empty:
+        return "Not enough data for seasonal analytics."
+        
+    sdf['season'] = sdf['month'].apply(determine_season)
+    
+    seasonal_stats = sdf.groupby('season').agg({
+        'temperature_celsius': 'mean',
+        'precip_mm': 'mean'
+    }).to_dict('index')
+    
+    seasons_available = list(seasonal_stats.keys())
+    if not seasons_available:
+        return ""
+    
+    hottest_s = max(seasonal_stats, key=lambda k: seasonal_stats[k]['temperature_celsius'])
+    coldest_s = min(seasonal_stats, key=lambda k: seasonal_stats[k]['temperature_celsius'])
+    wettest_s = max(seasonal_stats, key=lambda k: seasonal_stats[k]['precip_mm'])
+    
+    h_temp = seasonal_stats[hottest_s]['temperature_celsius']
+    c_temp = seasonal_stats[coldest_s]['temperature_celsius']
+    w_rain = seasonal_stats[wettest_s]['precip_mm']
+    swing  = h_temp - c_temp
+    
+    # Dynamic narrative assembly
+    insight = f"The <b>{hottest_s}</b> is the warmest period, peaking at <b>{h_temp:.1f}°C</b>. "
+    
+    if hottest_s != coldest_s:
+        insight += f"In contrast, <b>{coldest_s}</b> averages <b>{c_temp:.1f}°C</b>, representing a <b>{swing:.1f}°C seasonal swing</b>. "
+    
+    if w_rain > 0.5:
+        insight += f"Rainfall peaks during <b>{wettest_s}</b> at <b>{w_rain:.2f}mm</b> avg."
+
+    narrative_html = f"""
+    <div class="narrator-box">
+        <div class="narrator-icon">🌓</div>
+        <div>
+            <div class="narrator-label">Seasonal Intelligence — {page_name}</div>
+            <div class="narrator-text">{insight}</div>
+        </div>
+    </div>
+    """
+    return narrative_html
+
 # --- SIDEBAR NAV & FILTERS ---
 st.sidebar.markdown("""
 <div style="text-align:center; padding: 8px 0 16px;">
@@ -655,7 +708,7 @@ elif page == "🌡️ Temperature Trends":
 elif page == "📈 Seasonal Cycles":
     st.title("📈 Time Series & Rolling Averages")
     st.markdown('<div class="hero-banner"><h2>Seasonal Cycles</h2><p>Analyze multi-country temperature time series and rolling averages to detect seasonal patterns.</p></div>', unsafe_allow_html=True)
-    st.markdown(get_smart_narration(filtered_df, df, "TimeSeries"), unsafe_allow_html=True)
+    st.markdown(get_seasonal_intelligence(filtered_df, "Seasonal Metrics"), unsafe_allow_html=True)
     
     # Use sidebar selection or default to top 3 if empty
     ts_countries = selected_countries if selected_countries else ["United States of America", "India", "Brazil"]
