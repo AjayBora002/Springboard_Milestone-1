@@ -1048,18 +1048,17 @@ elif page == "🧳 Travel Risk Monitor":
         col_main, col_stats = st.columns([2, 3])
         
         with col_main:
-            st.markdown(f"""
-            <div class="glass-card" style="height: 100%; display: flex; flex-direction: column; justify-content: center; min-height: 200px;">
-                <h4 style="margin:0; color:var(--text-3); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Temperature Variance</h4>
-                <div style="font-size: 3.5rem; font-weight: 800; line-height:1; margin: 10px 0; background: linear-gradient(130deg, #f1f5f9 20%, {t_color} 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                    {temp_delta:+.1f}°C
-                </div>
-                <div style="color: {t_color}; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
-                    <span style="font-size:1.2rem;">{t_icon}</span> 
-                    {'Significantly ' if is_significant else ''} {'Warmer' if temp_delta > 0 else 'Cooler'} than {travel_month_name} avg
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="glass-card" style="height: 100%; display: flex; flex-direction: column; justify-content: center; min-height: 200px;">'
+                f'<h4 style="margin:0; color:var(--text-3); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Temperature Variance</h4>'
+                f'<div style="font-size: 3.5rem; font-weight: 800; line-height:1; margin: 10px 0; color: {t_color};">'
+                f'{temp_delta:+.1f}°C</div>'
+                f'<div style="color: {t_color}; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">'
+                f'<span style="font-size:1.2rem;">{t_icon}</span> '
+                f'{"Significantly " if is_significant else ""} {"Warmer" if temp_delta > 0 else "Cooler"} than {travel_month_name} avg'
+                f'</div></div>',
+                unsafe_allow_html=True
+            )
             
         with col_stats:
             # Stats Grid
