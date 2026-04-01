@@ -1068,22 +1068,19 @@ elif page == "🧳 Travel Risk Monitor":
             def create_mini_card(label, live_val, hist_val, unit, icon):
                 diff = live_val - hist_val
                 d_color = "#34D399" if abs(diff) < 15 else "#FBBF24"
-                return f"""
-                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div>
-                        <div style="font-size: 0.65rem; color: var(--text-3); font-weight: 700; text-transform: uppercase;">{icon} {label}</div>
-                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-1); margin: 4px 0;">{live_val:.1f}{unit}</div>
-                    </div>
-                    <div style="font-size: 0.7rem; color: {d_color}; font-weight: 600;">
-                        Norm: {hist_val:.1f}{unit} ({diff:+.1f})
-                    </div>
-                </div>
-                """
+                return (
+                    f'<div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); '
+                    f'border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">'
+                    f'<div><div style="font-size: 0.65rem; color: var(--text-3); font-weight: 700; text-transform: uppercase;">{icon} {label}</div>'
+                    f'<div style="font-size: 1.2rem; font-weight: 700; color: var(--text-1); margin: 4px 0;">{live_val:.1f}{unit}</div></div>'
+                    f'<div style="font-size: 0.7rem; color: {d_color}; font-weight: 600;">'
+                    f'Norm: {hist_val:.1f}{unit} ({diff:+.1f})</div></div>'
+                )
             
             inner_html += create_mini_card("Humidity", live_weather['humidity'], avg_hum, "%", "💧")
             inner_html += create_mini_card("Wind Speed", live_wind_mph, avg_wind, " mph", "💨")
-            inner_html += create_mini_card("Rainfall", avg_precip, avg_precip, " mm", "☔") # Historical baseline
-            inner_html += create_mini_card("UV Index", avg_uv, avg_uv, "", "☀️") # Historical baseline
+            inner_html += create_mini_card("Rainfall", avg_precip, avg_precip, " mm", "☔")
+            inner_html += create_mini_card("UV Index", avg_uv, avg_uv, "", "☀️")
             inner_html += "</div>"
             
             st.markdown(inner_html, unsafe_allow_html=True)
