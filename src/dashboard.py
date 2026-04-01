@@ -952,16 +952,7 @@ elif page == "📡 Live City Search":
     
     city_input = st.text_input("Enter City Name (e.g., London, Mumbai, New York)", placeholder="London")
     
-    # Show narrator only after a city is entered, comparing city-matched historical data to global average
     if city_input:
-        # Try to match a city or country in the historical dataset for context
-        matched_city_df = df[df['location_name'].str.contains(city_input, case=False, na=False)]
-        if matched_city_df.empty:
-            matched_city_df = df[df['country'].str.contains(city_input, case=False, na=False)]
-        narrator_df = matched_city_df if not matched_city_df.empty else filtered_df
-        st.markdown(get_overview_intelligence(narrator_df), unsafe_allow_html=True)
-    
-    if city_input:  # noqa: redefined but kept for API fetch block
         with st.spinner(f"Fetching live data for {city_input}..."):
             weather = get_live_weather(city_input)
             
