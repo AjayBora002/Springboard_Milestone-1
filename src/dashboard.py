@@ -1029,29 +1029,74 @@ elif page == "🧳 Travel Risk Monitor":
     api_target   = get_location_for_api(dest_country)
     live_weather = get_live_weather(api_target)
 
-    st.markdown('<div class="section-label">📡 Live Conditions</div>', unsafe_allow_html=True)
+    # ── Climate Baseline Intelligence (Unified Comparison) ──────────────
+    st.markdown('<div class="section-label">🧠 Climate Baseline vs. Real-Time</div>', unsafe_allow_html=True)
+    
     if "error" not in live_weather:
-        l1, l2, l3, l4 = st.columns(4)
-        l1.metric("🌡️ Current Temp",  f"{live_weather['temp']}°C")
-        l2.metric("💧 Humidity",       f"{live_weather['humidity']}%")
-        l3.metric("💨 Wind Speed",     f"{live_weather['wind_speed']} m/s")
-        l4.metric("🌤️ Condition",     live_weather['description'])
-        st.caption(f"📍 Live data via OpenWeatherMap — {live_weather['city']}, {live_weather['country']}")
+        # Standardize units: Live Wind (m/s) to mph
+        live_wind_mph = live_weather['wind_speed'] * 2.237
+        
+        # Calculate Deltas
+        temp_delta = live_weather['temp'] - avg_temp
+        hum_delta  = live_weather['humidity'] - avg_hum
+        
+        # UI State Logic
+        is_significant = abs(temp_delta) > 5
+        t_color = "#F43F5E" if temp_delta > 3 else ("#22D3EE" if temp_delta < -3 else "#94A3B8")
+        t_icon  = "🔺" if temp_delta > 0.5 else ("🔻" if temp_delta < -0.5 else "⏺")
+        
+        col_main, col_stats = st.columns([2, 3])
+        
+        with col_main:
+            st.markdown(f"""
+            <div class="glass-card" style="height: 100%; display: flex; flex-direction: column; justify-content: center; min-height: 200px;">
+                <h4 style="margin:0; color:var(--text-3); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Temperature Variance</h4>
+                <div style="font-size: 3.5rem; font-weight: 800; line-height:1; margin: 10px 0; background: linear-gradient(130deg, #f1f5f9 20%, {t_color} 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    {temp_delta:+.1f}°C
+                </div>
+                <div style="color: {t_color}; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size:1.2rem;">{t_icon}</span> 
+                    {'Significantly ' if is_significant else ''} {'Warmer' if temp_delta > 0 else 'Cooler'} than {travel_month_name} avg
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        with col_stats:
+            # Stats Grid
+            inner_html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 100%;">'
+            
+            def create_mini_card(label, live_val, hist_val, unit, icon):
+                diff = live_val - hist_val
+                d_color = "#34D399" if abs(diff) < 15 else "#FBBF24"
+                return f"""
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="font-size: 0.65rem; color: var(--text-3); font-weight: 700; text-transform: uppercase;">{icon} {label}</div>
+                        <div style="font-size: 1.2rem; font-weight: 700; color: var(--text-1); margin: 4px 0;">{live_val:.1f}{unit}</div>
+                    </div>
+                    <div style="font-size: 0.7rem; color: {d_color}; font-weight: 600;">
+                        Norm: {hist_val:.1f}{unit} ({diff:+.1f})
+                    </div>
+                </div>
+                """
+            
+            inner_html += create_mini_card("Humidity", live_weather['humidity'], avg_hum, "%", "💧")
+            inner_html += create_mini_card("Wind Speed", live_wind_mph, avg_wind, " mph", "💨")
+            inner_html += create_mini_card("Rainfall", avg_precip, avg_precip, " mm", "☔") # Historical baseline
+            inner_html += create_mini_card("UV Index", avg_uv, avg_uv, "", "☀️") # Historical baseline
+            inner_html += "</div>"
+            
+            st.markdown(inner_html, unsafe_allow_html=True)
+            
     else:
-        st.markdown(
-            f'<div class="insight-card"><p>⚠️ Live weather unavailable for <b>{dest_country}</b> ({live_weather["error"]}). '
-            f'Historical data shown below.</p></div>',
-            unsafe_allow_html=True
-        )
-
-    # ── Historical KPIs ────────────────────────────────────────────────
-    st.markdown(f"### 📊 Historical Climate: {dest_country} — {travel_month_name}")
-    k1, k2, k3, k4, k5 = st.columns(5)
-    k1.metric("🌡️ Avg Temp",    f"{avg_temp:.1f}°C")
-    k2.metric("💧 Humidity",    f"{avg_hum:.0f}%")
-    k3.metric("☔ Rainfall",    f"{avg_precip:.1f} mm")
-    k4.metric("☀️ UV Index",   f"{avg_uv:.1f}")
-    k5.metric("💨 Wind",        f"{avg_wind:.1f} mph")
+        st.markdown(f'<div class="risk-card warning"><h5>Live Data Interruption</h5><p>{live_weather["error"]}</p></div>', unsafe_allow_html=True)
+        st.markdown(f"### 📊 Historical Climate Baseline: {dest_country} — {travel_month_name}")
+        k1, k2, k3, k4, k5 = st.columns(5)
+        k1.metric("🌡️ Avg Temp", f"{avg_temp:.1f}°C")
+        k2.metric("💧 Humidity", f"{avg_hum:.0f}%")
+        k3.metric("☔ Rainfall", f"{avg_precip:.1f} mm")
+        k4.metric("☀️ UV Index", f"{avg_uv:.1f}")
+        k5.metric("💨 Wind", f"{avg_wind:.1f} mph")
 
     # ── 5-Day Live Forecast ────────────────────────────────────────────
     st.markdown("---")
