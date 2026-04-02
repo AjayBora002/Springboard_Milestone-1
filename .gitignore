@@ -1,7 +1,8 @@
 # Ignore Data Files (Too large for GitHub)
-data/
-*.csv
+data/raw/
 *.zip
+!data/processed/cleaned_weather_data.csv
+!data/processed/monthly_weather_summary.csv
 
 # Ignore Secrets (Security!)
 kaggle.json

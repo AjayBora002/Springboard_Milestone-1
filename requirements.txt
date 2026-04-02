@@ -6,4 +6,10 @@ seaborn
 plotly
 nbformat
 ipykernel
-streamlit
+streamlit>=1.32.0
+altair>=5.0.0
+Pillow
+requests
+python-dotenv
+scipy
+statsmodels
